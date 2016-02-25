@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1">
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/button_emoji_mad"
+            android:layout_weight="1"
+            android:src="@drawable/mad"
+            android:contentDescription="mad"
+            android:onClick="sendMessage"/>
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/button_emoji_praise"
+            android:layout_weight="1"
+            android:src="@drawable/thankyou"
+            android:contentDescription="thank you"
+            android:onClick="sendMessage"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1">
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/button_emoji_slowdown"
+            android:layout_weight="1"
+            android:src="@drawable/slowdown"
+            android:contentDescription="slow down"
+            android:onClick="sendMessage"/>
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/button_emoji_badparking"
+            android:layout_weight="1"
+            android:src="@drawable/no_parking"
+            android:contentDescription="bad parking"
+            android:onClick="sendMessage"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1">
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/button_emoji_cellphone"
+            android:layout_weight="1"
+            android:src="@drawable/cellphone"
+            android:contentDescription="cell phone"
+            android:onClick="sendMessage"/>
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/button_emoji_mechanic"
+            android:layout_weight="1"
+            android:src="@drawable/mechanic"
+            android:contentDescription="mechanical issues"
+            android:onClick="sendMessage"/>
+    </LinearLayout>
+
+</LinearLayout>

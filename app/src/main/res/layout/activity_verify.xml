@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ABC-123"
+        android:id="@+id/button_plate1"
+        android:layout_weight="1.0"
+        android:textSize="40sp"
+        android:onClick="verifyPlate" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MNO-456"
+        android:id="@+id/button_plate2"
+        android:layout_weight="1.0"
+        android:textSize="40sp"
+        android:onClick="verifyPlate" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="XYZ-789"
+        android:id="@+id/button_plate3"
+        android:layout_weight="1.0"
+        android:textSize="40sp"
+        android:onClick="verifyPlate" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Display More Plates"
+        android:id="@+id/button_more_plates"
+        android:layout_weight="1.0"
+        android:textSize="25sp"/>
+
+</LinearLayout>
