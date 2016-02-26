@@ -281,7 +281,7 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         if(requestCode == REQUEST_CODE)
             if(resultCode == RESULT_OK) {
 
-                mCurrentPhotoPath = data.getStringExtra("picture");
+                mCurrentPhotoPath = data.getExtras().getString("picture");
 
                 Log.d(TAG, "Picture Past" + mCurrentPhotoPath);
 
