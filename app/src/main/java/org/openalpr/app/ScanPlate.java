@@ -20,9 +20,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -34,33 +38,32 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.openalpr.app.AppConstants.*;
 
 
-public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
+public class ScanPlate extends Activity implements AsyncListener<AlprResult>, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "ScanPlate: ";
+
+    private static final int PLATE_RETURN_COUNT = 10;
+
     private static final int REQUEST_CODE = 1;
 
     private String mCurrentPhotoPath;
+
     private ImageView mImageView;
 
     private EditText plate;
+
     private EditText processingTime;
 
     private TextView errorText;
 
     private ProgressDialog progressDialog;
 
-//    Button.OnClickListener takePhotoBtnClickListener = new Button.OnClickListener(){
-//
-//        @Override
-//        public void onClick(View view) {
-//            dispatchTakePictureIntent();
-//        }
-//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +85,8 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
         mImageView = (ImageView)findViewById(R.id.imageView);
 
-        plate = (EditText)findViewById(R.id.plateNumberId);
-        processingTime = (EditText)findViewById(R.id.processingTimeId);
+//        plate = (EditText)findViewById(R.id.plateNumberId);
+//        processingTime = (EditText)findViewById(R.id.processingTimeId);
 
 
         errorText = (TextView)findViewById(R.id.errorTextView);
@@ -165,44 +168,6 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         }
     }
 
-//    private File getStorageDir(){
-//        File storageDir = null;
-//
-//        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-//
-//            storageDir = getExternalFilesDir(null);
-//            /*if (storageDir != null) {
-//                if (! storageDir.mkdirs()) {
-//                    if (! storageDir.exists()){
-//                        Log.d("camera-app-photos", "failed to create directory");
-//                        return null;
-//                    }
-//                }
-//            }*/
-//
-//        } else {
-//            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
-//        }
-//
-//        return storageDir;
-//    }
-
-//    private File createImageFile() throws IOException {
-//        // Create an image file name
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
-//        File storageDir = getStorageDir();
-//        File imageF = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, storageDir);
-//        return imageF;
-//    }
-//
-//    private File setUpPhotoFile() throws IOException {
-//
-//        File f = createImageFile();
-//        mCurrentPhotoPath = f.getAbsolutePath();
-//
-//        return f;
-//    }
 
     private void handleBigCameraPhoto() {
 
@@ -256,22 +221,8 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
     public void takePicture(View view) {
         setErrorText("");
-        clearData();
+//        clearData();
         Intent takePictureIntent = new Intent(this, CameraActivity.class);
-//        startActivityForResult(takePictureIntent, RESULT_OK);
-
-
-//        File f = null;
-//
-//        try {
-//            f = setUpPhotoFile();
-//            mCurrentPhotoPath = f.getAbsolutePath();
-//            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            f = null;
-//            mCurrentPhotoPath = null;
-//        }
 
         startActivityForResult(takePictureIntent, REQUEST_CODE);
     }
@@ -290,7 +241,7 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
                         RUNTIME_DATA_DIR_ASSET + File.separatorChar +OPENALPR_CONF_FILE;
                handleBigCameraPhoto();
     //            displayImage();
-                String parameters[] = {"us", "", mCurrentPhotoPath , openAlprConfFile, "1"};
+                String parameters[] = {"us", "", mCurrentPhotoPath , openAlprConfFile, String.valueOf(PLATE_RETURN_COUNT) };
                 Bundle args = new Bundle();
                 args.putStringArray(ALPR_ARGS, parameters);
                 AlprFragment alprFragment = (AlprFragment)getFragmentManager()
@@ -308,42 +259,22 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
     }
 
 
-//    public static boolean isIntentAvailable(Context context, String action) {
-//        final PackageManager packageManager = context.getPackageManager();
-//        final Intent intent = new Intent(action);
-//        List<ResolveInfo> list =
-//                packageManager.queryIntentActivities(intent,
-//                        PackageManager.MATCH_DEFAULT_ONLY);
-//        return list.size() > 0;
+//    public void setPlate(String plate) {
+//        this.plate.setText(plate);
 //    }
 //
-//    private void setBtnListenerOrDisable(
-//            Button btn,
-//            Button.OnClickListener onClickListener,
-//            String intentName
-//    ) {
-//        if (isIntentAvailable(this, intentName)) {
-//            btn.setOnClickListener(onClickListener);
-//        }
+//    public void setProcessingTime(long processingTime){
+//        this.processingTime.setText(String.format("%d %s", processingTime, "ms"));
 //    }
-//
-
-    public void setPlate(String plate) {
-        this.plate.setText(plate);
-    }
-
-    public void setProcessingTime(long processingTime){
-        this.processingTime.setText(String.format("%d %s", processingTime, "ms"));
-    }
 
     private void setErrorText(String text) {
         errorText.setText(text);
     }
-
-    private void clearData(){
-        plate.setText("");
-        processingTime.setText("");
-    }
+//
+//    private void clearData(){
+//        plate.setText("");
+//        processingTime.setText("");
+//    }
 
     @Override
     public void onPreExecute() {
@@ -361,15 +292,38 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
     public void onPostExecute(AlprResult alprResult) {
         if(alprResult.isRecognized()) {
             List<AlprResultItem> resultItems = alprResult.getResultItems();
-            if (resultItems.size() > 0) {
-                AlprResultItem resultItem = resultItems.get(0);
-                setPlate(resultItem.getPlate());
-                setProcessingTime(alprResult.getProcessingTime());
+            List<AlprCandidate> candidates = alprResult.getCandidates();
 
-                Log.d(TAG, resultItem.getPlate());
-                Log.d(TAG, String.valueOf(resultItem.getConfidence()));
+            Iterator<AlprCandidate> iterator = candidates.iterator();
+            for(AlprCandidate elements: candidates) {
+                Log.d(TAG, "Plate number: " + elements.getPlate());
+                Log.d(TAG, "Confidence: " + elements.getConfidence());
+            }
+
+
+            Spinner spinner = (Spinner) findViewById(R.id.spinner);
+            if (candidates.size() > 0 ) {
+                ArrayAdapter<AlprCandidate> adapter = new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_spinner_item,
+                        candidates
+                );
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(adapter);
 
             }
+
+
+
+//            if (resultItems.size() > 0) {
+//                AlprResultItem resultItem = resultItems.get(0);
+//                setPlate(resultItem.getPlate());
+//                setProcessingTime(alprResult.getProcessingTime());
+//
+//                Log.d(TAG, resultItem.getPlate());
+//                Log.d(TAG, String.valueOf(resultItem.getConfidence()));
+//
+//            }
             cleanUp();
         }else {
             setErrorText(getString(R.string.recognition_error));
@@ -391,4 +345,67 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         progressDialog.setMessage("Processing Image data");
         progressDialog.show();
     }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // when a item is pressed in the spinner it should call invoke a intent to MessageActivity
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        spinner.setOnItemClickListener((AdapterView.OnItemClickListener) this);
+        Intent intent = new Intent(this, MessageActivity.class);
+        startActivity(intent);
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // do nothing
+    }
 }
+
+
+//    private File getStorageDir(){
+//        File storageDir = null;
+//
+//        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+//
+//            storageDir = getExternalFilesDir(null);
+//            /*if (storageDir != null) {
+//                if (! storageDir.mkdirs()) {
+//                    if (! storageDir.exists()){
+//                        Log.d("camera-app-photos", "failed to create directory");
+//                        return null;
+//                    }
+//                }
+//            }*/
+//
+//        } else {
+//            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
+//        }
+//
+//        return storageDir;
+//    }
+
+//    private File createImageFile() throws IOException {
+//        // Create an image file name
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
+//        File storageDir = getStorageDir();
+//        File imageF = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, storageDir);
+//        return imageF;
+//    }
+//
+//    private File setUpPhotoFile() throws IOException {
+//
+//        File f = createImageFile();
+//        mCurrentPhotoPath = f.getAbsolutePath();
+//
+//        return f;
+//    }
+
+//    Button.OnClickListener takePhotoBtnClickListener = new Button.OnClickListener(){
+//
+//        @Override
+//        public void onClick(View view) {
+//            dispatchTakePictureIntent();
+//        }
+//    };

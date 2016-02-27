@@ -21,68 +21,68 @@
         android:layout_gravity="center_horizontal"
         android:textColor="@android:color/holo_red_dark" />
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+    <!--<TableLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content" >-->
 
-        <TableRow
-            android:id="@+id/tableRow1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp" >
+        <!--<TableRow-->
+            <!--android:id="@+id/tableRow1"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="10dp" >-->
 
-            <TextView
-                android:id="@+id/plateLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/plate_label"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_gravity="center_vertical" />
+            <!--<TextView-->
+                <!--android:id="@+id/plateLabel"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/plate_label"-->
+                <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
+                <!--android:layout_gravity="center_vertical" />-->
 
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:id="@+id/plateNumberId"
-                android:ems="10" android:inputType="text"
-                android:layout_gravity="center_vertical" />
-        </TableRow>
-        <TableRow
-            android:id="@+id/tableRow2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp" >
+            <!--<EditText-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="4dp"-->
+                <!--android:id="@+id/plateNumberId"-->
+                <!--android:ems="10" android:inputType="text"-->
+                <!--android:layout_gravity="center_vertical" />-->
+        <!--</TableRow>-->
+        <!--<TableRow-->
+            <!--android:id="@+id/tableRow2"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="10dp" >-->
 
-            <TextView
-                android:id="@+id/processingTimeLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/processingTime_label"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_gravity="center_vertical" />
+            <!--<TextView-->
+                <!--android:id="@+id/processingTimeLabel"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/processingTime_label"-->
+                <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
+                <!--android:layout_gravity="center_vertical" />-->
 
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:id="@+id/processingTimeId"
-                android:ems="10" android:inputType="text"
-                android:layout_gravity="center_vertical" />
+            <!--<EditText-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="4dp"-->
+                <!--android:id="@+id/processingTimeId"-->
+                <!--android:ems="10" android:inputType="text"-->
+                <!--android:layout_gravity="center_vertical" />-->
 
 
-        </TableRow>
-    </TableLayout>
+        <!--</TableRow>-->
+    <!--</TableLayout>-->
 
-    <LinearLayout
-        android:orientation="horizontal"
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal" android:layout_marginTop="10dp">
+        android:layout_weight="2"
+        android:id="@+id/imageView" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/imageView" />
-    </LinearLayout>
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 
 </LinearLayout>

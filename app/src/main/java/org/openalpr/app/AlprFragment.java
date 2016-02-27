@@ -10,11 +10,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openalpr.Alpr;
+
+import static com.google.android.gms.internal.zzir.runOnUiThread;
 import static org.openalpr.app.AppConstants.ALPR_ARGS;
 import static org.openalpr.app.AppConstants.JSON_RESULT_ARRAY_NAME;
 
 import java.io.File;
-
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -33,8 +37,11 @@ public class AlprFragment extends Fragment {
         setRetainInstance(true);
         Bundle arguments = getArguments();
         String[] parameters = arguments.getStringArray(ALPR_ARGS);
-        alprTask = new AlprTask();
-        alprTask.execute(parameters);
+
+
+            alprTask = new AlprTask();
+
+            alprTask.execute(parameters);
 
     }
 
@@ -66,24 +73,24 @@ public class AlprFragment extends Fragment {
 
         @Override
         protected AlprResult doInBackground(String... parameter) {
-            if(parameter.length == 5) {
-                String country = parameter[0];
-                String region = parameter[1];
-                String filePath = parameter[2];
-                String confFile = parameter[3];
-                String stopN = parameter[4];
 
-                int topN = Integer.parseInt(stopN);
+                    if (parameter.length == 5) {
+                        String country = parameter[0];
+                        String region = parameter[1];
+                        String filePath = parameter[2];
+                        String confFile = parameter[3];
+                        String stopN = parameter[4];
 
-                String result = alpr.recognizeWithCountryRegionNConfig(country, region, filePath,
-                        confFile, topN);
-                AlprResult alprResult = processJsonResult(result);
+                        int topN = Integer.parseInt(stopN);
 
-//                deleteImageFile(filePath);
+                        String result = alpr.recognizeWithCountryRegionNConfig(country, region, filePath,
+                                confFile, topN);
 
-                return alprResult;
-            }
-            return new AlprResult();
+                        AlprResult alprResult = processJsonResult(result);
+
+                        return alprResult;
+                    }
+                    return new AlprResult();
         }
 
         @Override
@@ -118,7 +125,12 @@ public class AlprFragment extends Fragment {
             alprResult.setProcessingTime(jsonObject.getLong("processing_time_ms"));
             AlprResultItem alprResultItem = null;
 
+
+            Log.d(LOG_TAG, String.valueOf(alprResult.getCandidates()));
+
+
             for (int i = 0; i < resultArray.length(); i++) {
+
                 JSONObject resultObject = resultArray.getJSONObject(i);
                 alprResultItem = new AlprResultItem();
                 alprResultItem.setPlate(resultObject.getString("plate"));
@@ -128,13 +140,6 @@ public class AlprFragment extends Fragment {
             }
         }
 
-//        private void deleteImageFile(final String filePath){
-//            File file = new File(filePath);
-//            if(file.exists()){
-//                file.delete();
-//                Log.i(LOG_TAG, String.format("Deleted file %s", filePath));
-//            }
-//        }
     }
 }
 
