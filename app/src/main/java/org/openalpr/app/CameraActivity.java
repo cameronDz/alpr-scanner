@@ -272,6 +272,10 @@ public class CameraActivity extends AppCompatActivity {
                 if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     mCamera = getCameraInstance();
                 }
+//
+//            TODO set permissions for newer devices some how.
+//
+//                mCamera = getCameraInstance();
             }
             else{
                 mCamera = getCameraInstance();
