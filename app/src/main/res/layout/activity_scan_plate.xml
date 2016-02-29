@@ -4,13 +4,27 @@
     android:layout_height="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
     <Button
+        android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="takePicture"
         android:text="@string/take_picture_btn_label"
         android:id="@+id/button"
         android:layout_gravity="center_horizontal" />
+    <Button
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="enterText"
+        android:text="@string/enter_text_btn_label"
+        android:id="@+id/button_text"
+        android:layout_gravity="center_horizontal" />
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
@@ -21,57 +35,6 @@
         android:layout_gravity="center_horizontal"
         android:textColor="@android:color/holo_red_dark" />
 
-    <!--<TableLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" >-->
-
-        <!--<TableRow-->
-            <!--android:id="@+id/tableRow1"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_margin="10dp" >-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/plateLabel"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="@string/plate_label"-->
-                <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
-                <!--android:layout_gravity="center_vertical" />-->
-
-            <!--<EditText-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginLeft="4dp"-->
-                <!--android:id="@+id/plateNumberId"-->
-                <!--android:ems="10" android:inputType="text"-->
-                <!--android:layout_gravity="center_vertical" />-->
-        <!--</TableRow>-->
-        <!--<TableRow-->
-            <!--android:id="@+id/tableRow2"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_margin="10dp" >-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/processingTimeLabel"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="@string/processingTime_label"-->
-                <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
-                <!--android:layout_gravity="center_vertical" />-->
-
-            <!--<EditText-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginLeft="4dp"-->
-                <!--android:id="@+id/processingTimeId"-->
-                <!--android:ems="10" android:inputType="text"-->
-                <!--android:layout_gravity="center_vertical" />-->
-
-
-        <!--</TableRow>-->
-    <!--</TableLayout>-->
 
     <ImageView
         android:layout_width="match_parent"
@@ -79,10 +42,32 @@
         android:layout_weight="2"
         android:id="@+id/imageView" />
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <Spinner
+            android:layout_weight="1"
+            android:id="@+id/plate_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </Spinner>
+
     <Spinner
-        android:id="@+id/spinner"
+        android:layout_weight="3"
+        android:entries="@array/states"
+        android:id="@+id/state_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    </LinearLayout>
+    <Button
+        android:text="@string/submit_button"
+        android:id="@+id/submit_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

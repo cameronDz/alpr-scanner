@@ -20,4 +20,6 @@ public interface AppConstants {
     static final String DLG_MESSAGE = "dlgMessage";
 
     static final String JSON_RESULT_ARRAY_NAME = "results";
+
+    static final String JSON_CANDIDATE_ARRAY_NAME = "candidates";
 }

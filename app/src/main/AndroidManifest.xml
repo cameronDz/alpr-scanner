@@ -3,7 +3,7 @@
     package="org.openalpr.app" >
 
     <uses-feature android:name="android.hardware.camera" />
-
+    <uses-permission android:name="android.permission.SET_DEBUG_APP"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
@@ -26,6 +26,11 @@
         <activity android:name=".ScanPlate"/>
         <activity android:name=".MessageActivity"/>
         <activity android:name=".VerifyPlateActivity"/>
+        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>
