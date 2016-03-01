@@ -24,8 +24,8 @@ import com.google.android.gms.maps.model.LatLng;
 /**
  * Created by Anthony Brignano on 2/14/16.
  *
- * MessageActivity: For composing and sending a message
- *      (associated view: activity_message)
+ * SendMessageActivity: For composing and sending a message
+ *      (associated view: activity_message_send)
  *
  *      - sendMessage(View): parses message after user clicks image button
  *      - onCreate(Bundle)
@@ -39,18 +39,18 @@ import com.google.android.gms.maps.model.LatLng;
  *  - Add method to save which image was selected to a text file on users device
  */
 
-public class MessageActivity extends AppCompatActivity implements
+public class SendMessageActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private Context context;
     private GoogleApiClient mGoogleApiClient;
-    private String TAG = "MessageActivity";
+    private String TAG = "SendMessageActivity";
     private LatLng mLatLng = null;
     private Location mLastLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message);
+        setContentView(R.layout.activity_message_send);
         context = this;
 
         // Create an instance of GoogleAPIClient.
