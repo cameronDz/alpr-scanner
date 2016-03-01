@@ -12,7 +12,7 @@ import android.widget.Button;
  * VerifyPlateActivity: For verification of the image recognition
  *      (associated view: activity_verify)
  *
- *      - verifyPlate(View): redirects to SendMessageActivity (on button click)
+ *      - verifyPlate(View): redirects to MessageSendActivity (on button click)
  *      - onCreate(Bundle)
  *
  * TO DO:
@@ -41,7 +41,7 @@ public class VerifyPlateActivity extends AppCompatActivity {
 
 
         // Open next activity view in application flow
-        Intent intent = new Intent(this, SendMessageActivity.class);
+        Intent intent = new Intent(this, MessageSendActivity.class);
         startActivity(intent);
     }
 

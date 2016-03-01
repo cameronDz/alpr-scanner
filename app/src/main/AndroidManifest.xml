@@ -17,17 +17,6 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
-
-        <!--<activity android:name=".LoginActivity">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        <!--</activity>-->
-
-
-
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name">
@@ -37,15 +26,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".CameraActivity" />
         <activity android:name=".ScanPlate"
             android:screenOrientation="portrait"/>
-        <activity android:name=".SendMessageActivity" />
+        <activity android:name=".MessageSendActivity" />
         <activity android:name=".VerifyPlateActivity" />
         <activity android:name=".ConfirmPlateActivity" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".InboxActivity" />
         <activity android:name=".RegisterActivity" />
+
     </application>
 
 </manifest>
