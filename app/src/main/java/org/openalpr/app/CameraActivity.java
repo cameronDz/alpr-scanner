@@ -142,10 +142,10 @@ public class CameraActivity extends AppCompatActivity {
 //            intent.putExtra("picture", tempFilePath);
 //            startActivity(intent);
 
-            Intent returnIntent = new Intent();
-            returnIntent.putExtra("picture", tempFilePath);
-            setResult(Activity.RESULT_OK,returnIntent);
-            finish();
+//            Intent returnIntent = new Intent();
+//            returnIntent.putExtra("picture", tempFilePath);
+//            setResult(Activity.RESULT_OK,returnIntent);
+//            finish();
 
         }
     };
@@ -234,11 +234,12 @@ public class CameraActivity extends AppCompatActivity {
 
                 refreshGallery(outFile);
                 tempFilePath = outFile.getAbsolutePath();
-/*
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("picture", tempFilePath );
-                setResult(Activity.RESULT_OK, resultIntent);
-*/
+
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("picture", tempFilePath);
+                setResult(Activity.RESULT_OK, returnIntent);
+                finish();
+
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -271,6 +272,10 @@ public class CameraActivity extends AppCompatActivity {
                 if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     mCamera = getCameraInstance();
                 }
+//
+//            TODO set permissions for newer devices some how.
+//
+//                mCamera = getCameraInstance();
             }
             else{
                 mCamera = getCameraInstance();

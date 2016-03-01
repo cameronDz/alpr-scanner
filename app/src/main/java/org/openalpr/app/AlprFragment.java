@@ -10,8 +10,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openalpr.Alpr;
-
-import static com.google.android.gms.internal.zzir.runOnUiThread;
 import static org.openalpr.app.AppConstants.ALPR_ARGS;
 import static org.openalpr.app.AppConstants.JSON_RESULT_ARRAY_NAME;
 
