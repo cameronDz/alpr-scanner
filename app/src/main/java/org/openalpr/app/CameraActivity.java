@@ -1,34 +1,52 @@
 package org.openalpr.app;
 
-        import android.app.Activity;
-        import android.Manifest;
-        import android.content.Context;
-        import android.content.Intent;
-        import android.content.pm.PackageManager;
-        import android.hardware.Camera;
-        import android.net.Uri;
-        import android.os.AsyncTask;
-        import android.os.Build;
-        import android.os.Environment;
-        import android.support.v4.app.ActivityCompat;
-        import android.support.v4.content.ContextCompat;
-        import android.support.v7.app.AppCompatActivity;
-        import android.os.Bundle;
-        import android.util.Log;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.FrameLayout;
-        import android.widget.ImageView;
-        import android.widget.RelativeLayout;
+import android.app.Activity;
+    import android.Manifest;
+    import android.content.Context;
+    import android.content.Intent;
+    import android.content.pm.PackageManager;
+    import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.hardware.Camera;
+import android.location.Location;
+import android.net.Uri;
+    import android.os.AsyncTask;
+    import android.os.Build;
+    import android.os.Environment;
+    import android.support.v4.app.ActivityCompat;
+    import android.support.v4.content.ContextCompat;
+    import android.support.v7.app.AppCompatActivity;
+import android.view.WindowManager;
+    import android.os.Bundle;
+    import android.util.Log;
+    import android.view.Display;
+    import android.view.Surface;
+    import android.view.View;
+    import android.widget.Button;
+    import android.widget.FrameLayout;
+    import android.widget.RelativeLayout;
 
-        import java.io.File;
-        import java.io.FileOutputStream;
-        import java.io.IOException;
-        import java.text.SimpleDateFormat;
-        import java.util.Date;
-        import java.util.Locale;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+    import java.io.IOException;
+    import java.text.SimpleDateFormat;
+    import java.util.Date;
+    import java.util.Locale;
 
 /**
+ *
  * Created by Anthony Brignano on 2/1/16.
  *
  * CameraActivity: For the camera scanning
@@ -43,7 +61,8 @@ package org.openalpr.app;
  *      - stopCamera(): Closes the camera
  *      - checkCameraHardware(Context): returns true if the users device has a camera
  *      - SaveImageTask: async task saves images in background while application remains running
- *      - permissionCheck(): checks and requests permissions used in applicaiton (for API 23)
+ *      - permissionCheck(): checks and requests permissions used in the applicaiton (for API 23)
+ *      - setCameraParameters(): sets parameters in the camera for both its orientation and auto-focus
  *      - onCreate(Bundle)
  *      - onPause
  *      - onResume
@@ -52,22 +71,22 @@ package org.openalpr.app;
  *
  *
  * TO DO:
- *  - add logic to save image in proper orientation
+ *  - test if logic to save image in proper orientation is still working
  *
  */
 
-public class CameraActivity extends AppCompatActivity {
-
-    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-    private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
+public class CameraActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private int MY_PERMISSIONS_CAMERA, MY_PERMISSIONS_ACCESS_FINE_LOCATION, MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     private static final String TAG = "CameraActivity";
-    private Uri fileUri;
     private Camera mCamera;
     private Context context;
     private CameraPreview mPreview;
+    private GoogleApiClient mGoogleApiClient;
+    private LatLng mLatLng = null;
+    private Location mLastLocation = null;
 
     private String tempFilePath;
 
@@ -77,6 +96,15 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         startCamera();
         context = this;
+
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         // Add a listener to the Capture button
         Button captureButton = (Button) findViewById(R.id.button_capture);
@@ -107,6 +135,7 @@ public class CameraActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        mGoogleApiClient.disconnect();
         super.onStop();
         if (mPreview != null) {
             FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
@@ -128,25 +157,22 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
             // calls async task to save images without interrupting application
             new SaveImageTask().execute(data);
+            Double lng = mLatLng.longitude;
+            Double lat = mLatLng.latitude;
+            String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+            Log.d(TAG,"Current LatLng: " + latlng);
             Log.d(TAG, "onPictureTaken - jpeg");
             // camera.startPreview();
             /** redirects to VerifyPlateActivity */
-//            Intent intent = new Intent(context, VerifyPlateActivity.class);
+            Intent intent = new Intent(context, VerifyPlateActivity.class);
 //            intent.putExtra("picture", tempFilePath);
-//            startActivity(intent);
-
-//            Intent returnIntent = new Intent();
-//            returnIntent.putExtra("picture", tempFilePath);
-//            setResult(Activity.RESULT_OK,returnIntent);
-//            finish();
-
+            startActivity(intent);
         }
     };
 
@@ -198,7 +224,6 @@ public class CameraActivity extends AppCompatActivity {
         return mediaFile;
     }
 
-
     /** async task to save images to /PlateScanner/camera_test directory */
     private class SaveImageTask extends AsyncTask<byte[], Void, Void> {
 
@@ -225,12 +250,70 @@ public class CameraActivity extends AppCompatActivity {
                 String format = ".jpg";
                 File outFile = new File(dir, timeStamp + "_" + fileName + format);
 
-                fos = new FileOutputStream(outFile);
+                /*fos = new FileOutputStream(outFile);
                 fos.write(data[0]);
                 fos.flush();
-                fos.close();
+                fos.close();*/
+
+                tempFilePath = outFile.getAbsolutePath();
+
+                Bitmap bmp = BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
+
+                Matrix matrix = new Matrix();
+                Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+                int rotation = context.getResources().getConfiguration().orientation;
+
+                //  fix screen orientation
+                if (display.getRotation() == Surface.ROTATION_0) {
+
+                    if (rotation == Configuration.ORIENTATION_LANDSCAPE) {
+                        matrix.postRotate(0);
+                    } else {
+                        matrix.postRotate(90);
+                    }
+                }
+
+                else if (display.getRotation() == Surface.ROTATION_90) {
+                    if (rotation == Configuration.ORIENTATION_PORTRAIT) {
+                        matrix.postRotate(270);
+                    }
+                    else {
+                        matrix.postRotate(0);
+                    }
+                }
+
+                else if (display.getRotation() == Surface.ROTATION_180) {
+                    if (rotation == Configuration.ORIENTATION_LANDSCAPE) {
+                        matrix.postRotate(180);
+                    }else {
+                        matrix.postRotate(270);
+                    }
+                }
+
+                else if (display.getRotation() == Surface.ROTATION_270) {
+                    if (rotation == Configuration.ORIENTATION_PORTRAIT) {
+                        matrix.postRotate(90);
+                    } else {
+                        matrix.postRotate(180);
+                    }
+                }
+
+//                matrix.postRotate(90);
+                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+
+                try {
+                    fos = new FileOutputStream(tempFilePath);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    fos.flush();
+                    fos.close();
+
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
                 Log.d(TAG, "onPictureTaken - wrote bytes: " + data.length + " to " + outFile.getAbsolutePath());
+                refreshGallery(outFile);
 
                 refreshGallery(outFile);
                 tempFilePath = outFile.getAbsolutePath();
@@ -272,24 +355,20 @@ public class CameraActivity extends AppCompatActivity {
                 if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     mCamera = getCameraInstance();
                 }
-//
-//            TODO set permissions for newer devices some how.
-//
-//                mCamera = getCameraInstance();
+
+                /**
+                 *
+                 * TODO set permissions for newer devices some how.
+                 * mCamera = getCameraInstance();
+                 *
+                 */
+
             }
             else{
                 mCamera = getCameraInstance();
             }
-            // set camera to auto focus
-            Camera.Parameters params = mCamera.getParameters();
-            if (params.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)){
-                params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-            }
-            else if (params.getSupportedFocusModes().contains(
-                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            }
-            mCamera.setParameters(params);
+
+            setCameraParameters();
 
             // Create our Preview view and set it as the content of our activity.
             mPreview = new CameraPreview(this, mCamera);
@@ -316,6 +395,126 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
+    /** set parameters for auto-focus & image stabilization */
+    public void setCameraParameters() {
+        // set preview size and make any resize, rotate or
+        // reformatting changes here
+        Camera.Parameters parameters = mCamera.getParameters();
+
+        // enable autofocus
+        if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)){
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        }
+        else if (parameters.getSupportedFocusModes().contains(
+                Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        }
+
+
+        Display display = this.getWindowManager().getDefaultDisplay();
+
+        int rotation = this.getResources().getConfiguration().orientation;
+        Log.d(TAG, "Screen rotation is " + rotation);
+        Log.d(TAG, "Display rotation is " + display.getRotation());
+
+        //  fix screen orientation
+        if (display.getRotation() == Surface.ROTATION_0) {
+
+            if (rotation == Configuration.ORIENTATION_LANDSCAPE) {
+                mCamera.setDisplayOrientation(0);
+            } else {
+                mCamera.setDisplayOrientation(90);
+            }
+        }
+
+        else if (display.getRotation() == Surface.ROTATION_90) {
+            if (rotation == Configuration.ORIENTATION_PORTRAIT) {
+                mCamera.setDisplayOrientation(270);
+            }
+            else {
+                mCamera.setDisplayOrientation(0);
+            }
+        }
+
+        else if (display.getRotation() == Surface.ROTATION_180) {
+            if (rotation == Configuration.ORIENTATION_LANDSCAPE) {
+                mCamera.setDisplayOrientation(180);
+            }else {
+                mCamera.setDisplayOrientation(270);
+            }
+        }
+
+        else if (display.getRotation() == Surface.ROTATION_270) {
+            if (rotation == Configuration.ORIENTATION_PORTRAIT) {
+                mCamera.setDisplayOrientation(90);
+            } else {
+                mCamera.setDisplayOrientation(180);
+            }
+        }
+
+        try {
+            mCamera.setParameters(parameters);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStart(){
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // check if API version is 23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            // check if permission is granted
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            }
+        }
+        else{
+            // if API version is not 23 just set mLastLocation
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        }
+        // set LatLng variable -- not sure if this is necessary, mLastLocation already exists as a Location variable
+        if (mLastLocation != null) {
+            mLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i){
+        // code to be run when connection is stopped
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult cr){
+        // code to be run when connection fails
+    }
+
+    protected void createLocationRequest() {
+        /**
+         * Performance hint: If your app accesses the network or does other long-running work
+         * after receiving a location update, adjust the fastest interval to a slower value.
+         * This adjustment prevents your app from receiving updates it can't use.
+         * Once the long-running work is done, set the fastest interval back to a fast value.
+         */
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
+                        builder.build());
+    }
+
     /** Check if this device has a camera */
     private boolean checkCameraHardware(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
@@ -325,7 +524,6 @@ public class CameraActivity extends AppCompatActivity {
     private static Uri getOutputMediaFileUri(int type) {
         return Uri.fromFile(getOutputMediaFile(type));
     }
-
 
     /** request permissions for API 23 */
     private void permissionCheck(){
@@ -360,5 +558,4 @@ public class CameraActivity extends AppCompatActivity {
                     MY_PERMISSIONS_CAMERA);
         }
     }
-
 }
