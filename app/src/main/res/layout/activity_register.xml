@@ -35,7 +35,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/username"
             android:layout_weight="1"
-            android:layout_marginBottom="15sp" />
+            android:layout_marginBottom="15sp"
+            android:autoText="true" />
 
         <TextView
             android:layout_width="wrap_content"

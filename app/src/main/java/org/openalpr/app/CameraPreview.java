@@ -3,6 +3,7 @@ package org.openalpr.app;
 import android.content.Context;
 import android.hardware.Camera;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import java.io.IOException;
@@ -28,10 +29,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private static final String TAG = "CameraPreview";
-    private static final int ORIENTATION_PORTRAIT_NORMAL =  1;
-    private static final int ORIENTATION_PORTRAIT_INVERTED =  2;
-    private static final int ORIENTATION_LANDSCAPE_NORMAL =  3;
-    private static final int ORIENTATION_LANDSCAPE_INVERTED =  4;
 
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -78,7 +75,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // reformatting changes here
 
         /** NOTE: the below line is hard-coded for my device & may need to be changed for yours */
-        mCamera.setDisplayOrientation(0);
+//        mCamera.setDisplayOrientation(0);
 
         // start preview with new settings
         try {
@@ -89,4 +86,5 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
     }
+
 }

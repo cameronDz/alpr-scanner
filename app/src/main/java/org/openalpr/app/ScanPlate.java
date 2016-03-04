@@ -1,33 +1,22 @@
 package org.openalpr.app;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import com.squareup.picasso.Picasso;
@@ -37,14 +26,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.lang.StringBuilder;
-import java.util.TooManyListenersException;
 
 import static org.openalpr.app.AppConstants.*;
 
@@ -104,8 +87,68 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         Intent intent = getIntent();
         mCurrentPhotoPath = intent.getStringExtra("picture");
 
+<<<<<<< HEAD
         handleBigCameraPhoto();
         startScanPlate();
+=======
+        /**
+         * spinner for state code
+         */
+        spinner = (Spinner) findViewById(R.id.state_spinner);
+        spinner.setSelected(false);
+        spinner.setOnItemSelectedListener(this);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.states_abbreviated, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        /**
+         * spinner for plate
+         */
+        tempList = new ArrayList<>(10);
+        plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
+        plateAdaptor = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, tempList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        plateSpinner.setOnItemSelectedListener(this);
+        plateSpinner.setAdapter(plateAdaptor);
+
+        errorText = (TextView) findViewById(R.id.errorTextView);
+
+        plateText = (EditText) findViewById(R.id.plateTextView);
+        plateText.setVisibility(View.INVISIBLE);
+
+
+    }
+
+    private void selectState() {
+        Spinner spin = (Spinner) findViewById(R.id.state_spinner);
+        state = spin.getSelectedItem().toString();
+        Log.d(TAG, "Selected State: " + state);
+    }
+
+    private void selectPlate(AlprResult alprResult) {
+        final List<AlprCandidate> candList = alprResult.getCandidates();
+        plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
+
+        for (int i = 0; i <candList.size(); i++) {
+            tempList.add(i,String.valueOf(candList.get(i).getPlate() + "\t" + candList.get(i).getConfidence()));
+            Log.d(TAG, String.valueOf(tempList.get(i)));
+
+        }
+
+        runOnUiThread(new Runnable() {
+            public void run() {
+                plateAdaptor.clear();
+                plateAdaptor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                plateAdaptor.notifyDataSetChanged();
+                plateSpinner.setAdapter(plateAdaptor);
+            }
+        });
+
+//        int index = plateSpinner.getSelectedItemPosition();
+//
+//        plateText.setText(candList.get(index).getPlate());
+>>>>>>> customview-messages
 
     }
 

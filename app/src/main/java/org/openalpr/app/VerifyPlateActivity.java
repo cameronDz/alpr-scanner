@@ -9,6 +9,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+
 import android.widget.EditText;
 
 import android.content.Intent;
@@ -65,7 +66,6 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
     private String[] plateArray = new String[10];
 
     private int index;
-
 
 
     @Override
@@ -164,16 +164,14 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
+        /**
+         * do nothing when nothing is selected
+         */
     }
 
     /** Called when the user clicks the button to verify the plate */
     public void submitPlate(View view) {
-        // Do something in response to button
 
- //       Button submitButton = (Button) findViewById(R.id.submit_button);
-
-        // Open next activity view in application flow
         Intent intent = new Intent(this, MessageActivity.class);
         intent.putExtra("plate", plateArray[index]);
         intent.putExtra("state", state);
