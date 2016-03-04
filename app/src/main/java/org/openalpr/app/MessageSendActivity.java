@@ -46,7 +46,6 @@ public class MessageSendActivity extends AppCompatActivity {
 
     private String TAG = "MessageSendActivity";
 
-
     private String state;
 
     private String plate;
