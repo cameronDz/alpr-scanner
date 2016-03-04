@@ -38,7 +38,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/plate_number"
             android:layout_weight="1"
-            android:layout_marginBottom="15sp" />
+            android:layout_marginBottom="15sp"
+            android:hint="License Plate #" />
 
         <TextView
             android:layout_width="wrap_content"
