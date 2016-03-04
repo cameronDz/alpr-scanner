@@ -172,7 +172,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
     /** Called when the user clicks the button to verify the plate */
     public void submitPlate(View view) {
 
-        Intent intent = new Intent(this, MessageActivity.class);
+        Intent intent = new Intent(this, MessageSendActivity.class);
         intent.putExtra("plate", plateArray[index]);
         intent.putExtra("state", state);
         startActivity(intent);
