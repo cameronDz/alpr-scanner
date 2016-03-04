@@ -166,16 +166,12 @@ public class CameraActivity extends AppCompatActivity implements
         public void onPictureTaken(byte[] data, Camera camera) {
             // calls async task to save images without interrupting application
             new SaveImageTask().execute(data);
-            Double lng = mLatLng.longitude;
-            Double lat = mLatLng.latitude;
-            String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
-            Log.d(TAG,"Current LatLng: " + latlng);
-            Log.d(TAG, "onPictureTaken - jpeg");
+//            Double lng = mLatLng.longitude;
+//            Double lat = mLatLng.latitude;
+//            String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+//            Log.d(TAG,"Current LatLng: " + latlng);
+//            Log.d(TAG, "onPictureTaken - jpeg");
             // camera.startPreview();
-            /** redirects to VerifyPlateActivity */
-            Intent intent = new Intent(context, VerifyPlateActivity.class);
-//            intent.putExtra("picture", tempFilePath);
-            startActivity(intent);
         }
     };
 
@@ -321,11 +317,6 @@ public class CameraActivity extends AppCompatActivity implements
                 refreshGallery(outFile);
                 tempFilePath = outFile.getAbsolutePath();
 
-//                Intent returnIntent = new Intent();
-//                returnIntent.putExtra("picture", tempFilePath);
-//                setResult(Activity.RESULT_OK, returnIntent);
-//                finish();
-
                 Intent intent = new Intent(context, ScanPlate.class);
                 intent.putExtra("picture", tempFilePath);
                 CameraActivity.this.startActivity(intent);
@@ -335,10 +326,6 @@ public class CameraActivity extends AppCompatActivity implements
             } catch (IOException e) {
                 e.printStackTrace();
             }
-//            Intent returnIntent = new Intent();
-//            returnIntent.putExtra("picture", tempFilePath);
-//            setResult(Activity.RESULT_OK,returnIntent);
-//            finish();
             return null;
         }
 

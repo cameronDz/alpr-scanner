@@ -87,70 +87,11 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         Intent intent = getIntent();
         mCurrentPhotoPath = intent.getStringExtra("picture");
 
-<<<<<<< HEAD
+
         handleBigCameraPhoto();
         startScanPlate();
-=======
-        /**
-         * spinner for state code
-         */
-        spinner = (Spinner) findViewById(R.id.state_spinner);
-        spinner.setSelected(false);
-        spinner.setOnItemSelectedListener(this);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.states_abbreviated, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        /**
-         * spinner for plate
-         */
-        tempList = new ArrayList<>(10);
-        plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
-        plateAdaptor = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, tempList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        plateSpinner.setOnItemSelectedListener(this);
-        plateSpinner.setAdapter(plateAdaptor);
-
-        errorText = (TextView) findViewById(R.id.errorTextView);
-
-        plateText = (EditText) findViewById(R.id.plateTextView);
-        plateText.setVisibility(View.INVISIBLE);
-
-
     }
 
-    private void selectState() {
-        Spinner spin = (Spinner) findViewById(R.id.state_spinner);
-        state = spin.getSelectedItem().toString();
-        Log.d(TAG, "Selected State: " + state);
-    }
-
-    private void selectPlate(AlprResult alprResult) {
-        final List<AlprCandidate> candList = alprResult.getCandidates();
-        plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
-
-        for (int i = 0; i <candList.size(); i++) {
-            tempList.add(i,String.valueOf(candList.get(i).getPlate() + "\t" + candList.get(i).getConfidence()));
-            Log.d(TAG, String.valueOf(tempList.get(i)));
-
-        }
-
-        runOnUiThread(new Runnable() {
-            public void run() {
-                plateAdaptor.clear();
-                plateAdaptor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                plateAdaptor.notifyDataSetChanged();
-                plateSpinner.setAdapter(plateAdaptor);
-            }
-        });
-
-//        int index = plateSpinner.getSelectedItemPosition();
-//
-//        plateText.setText(candList.get(index).getPlate());
->>>>>>> customview-messages
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

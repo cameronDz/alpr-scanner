@@ -98,7 +98,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         stateSpinner.setSelected(false);
         stateSpinner.setOnItemSelectedListener(this);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.states,
+                R.array.states_abbreviated,
                 android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stateSpinner.setAdapter(adapter);

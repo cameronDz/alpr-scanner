@@ -56,7 +56,7 @@ public class MessageActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message);
+        setContentView(R.layout.activity_message_send);
         context = this;
 
         // Create an instance of GoogleAPIClient.
@@ -78,18 +78,18 @@ public class MessageActivity extends AppCompatActivity implements
     }
 
     public void sendMessage(View view){
-        ImageButton message_button = (ImageButton)view;
-        String message = message_button.getContentDescription().toString();
-        Double lng = mLatLng.longitude;
-        Double lat = mLatLng.latitude;
-        String latlng = "(" + lng.toString() + ", " + lat.toString() + ")";
-        // untested line below
-        // message += latlng;
-        int duration = Toast.LENGTH_SHORT;
-
-        // displays message to user
-        Toast toast = Toast.makeText(context, message, duration);
-        toast.show();
+//        ImageButton message_button = (ImageButton)view;
+//        String message = message_button.getContentDescription().toString();
+//        Double lng = mLatLng.longitude;
+//        Double lat = mLatLng.latitude;
+//        String latlng = "(" + lng.toString() + ", " + lat.toString() + ")";
+//        // untested line below
+//        // message += latlng;
+//        int duration = Toast.LENGTH_SHORT;
+//
+//        // displays message to user
+//        Toast toast = Toast.makeText(context, message, duration);
+//        toast.show();
     }
 
     @Override
