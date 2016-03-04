@@ -2,11 +2,13 @@ package org.openalpr.app;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -47,6 +49,10 @@ public class MessageActivity extends AppCompatActivity implements
     private LatLng mLatLng = null;
     private Location mLastLocation = null;
 
+    private String state;
+
+    private String plate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +67,14 @@ public class MessageActivity extends AppCompatActivity implements
                     .addApi(LocationServices.API)
                     .build();
         }
+
+        // Get the plate and save to activity
+        Intent intent = getIntent();
+        state = intent.getStringExtra("state");
+        plate = intent.getStringExtra("plate");
+
+        Log.d(TAG, "STATE: " + state);
+        Log.d(TAG, "PLATE: " + plate);
     }
 
     public void sendMessage(View view){

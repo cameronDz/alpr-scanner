@@ -1,41 +1,83 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout
+    android:orientation="vertical"
 
-    <Button
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="takePicture"
+            android:text="@string/take_picture_btn_label"
+            android:id="@+id/button"
+            android:layout_gravity="center_horizontal" />
+        <Button
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="enterText"
+            android:text="@string/enter_text_btn_label"
+            android:id="@+id/enter_text"
+            android:layout_gravity="center_horizontal" />
+    </LinearLayout>
+
+    <EditText
+        android:inputType="textCapCharacters"
+        android:hint="Plate #"
+        android:textAlignment="center"
+        android:id="@+id/plateTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="ABC-123"
-        android:id="@+id/button_plate1"
-        android:layout_weight="1.0"
-        android:textSize="40sp"
-        android:onClick="verifyPlate" />
+        android:id="@+id/errorTextView"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/holo_red_dark" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="MNO-456"
-        android:id="@+id/button_plate2"
-        android:layout_weight="1.0"
-        android:textSize="40sp"
-        android:onClick="verifyPlate" />
 
-    <Button
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="XYZ-789"
-        android:id="@+id/button_plate3"
-        android:layout_weight="1.0"
-        android:textSize="40sp"
-        android:onClick="verifyPlate" />
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:id="@+id/imageView" />
 
-    <Button
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Display More Plates"
-        android:id="@+id/button_more_plates"
-        android:layout_weight="1.0"
-        android:textSize="25sp"/>
+        android:layout_height="wrap_content">
+
+
+        <Spinner
+            android:layout_weight="1"
+            android:id="@+id/plate_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </Spinner>
+
+        <Spinner
+            android:layout_weight="3"
+            android:entries="@array/states"
+            android:id="@+id/state_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+    <Button
+        android:text="@string/submit_button"
+        android:onClick="submitPlate"
+        android:id="@+id/submit_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

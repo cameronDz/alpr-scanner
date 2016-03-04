@@ -39,9 +39,10 @@
         </activity>
         <activity android:name=".CameraActivity" />
         <activity android:name=".ScanPlate"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="landscape"/>
         <activity android:name=".MessageActivity" />
-        <activity android:name=".VerifyPlateActivity" />
+        <activity android:name=".VerifyPlateActivity"
+            android:screenOrientation="portrait"/>
         <activity android:name=".ConfirmPlateActivity" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".InboxActivity" />

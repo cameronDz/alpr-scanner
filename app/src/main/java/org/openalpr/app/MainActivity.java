@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
     }
 
     public void startScan(View view) {
-        Intent cameraIntent = new Intent(this, ScanPlate.class);
+        Intent cameraIntent = new Intent(this, CameraActivity.class);
         MainActivity.this.startActivity(cameraIntent);
 
     }

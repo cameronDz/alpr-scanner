@@ -54,7 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openalpr.Alpr;
 
-public class ScanPlate extends Activity implements AsyncListener<AlprResult>, AdapterView.OnItemSelectedListener {
+public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
     private static final String TAG = "ScanPlate: ";
 
@@ -66,25 +66,21 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult>, Ad
 
     private ImageView mImageView;
 
-    private String state;
+    private String result;
 
-    private Spinner spinner;
-
-    private String plate;
-
-    private Spinner plateSpinner;
+    private ProgressDialog progressDialog;
 
     private AlprResult alprResult;
 
-    private TextView errorText;
+    private ArrayList<String> candidateList;
 
-    private EditText plateText;
-
-    private ProgressDialog progressDialog;
+    private String[] plateArray;
 
     private List<String> tempList;
 
     private ArrayAdapter<String> plateAdaptor;
+
+    private List<AlprCandidate> candList;
 
 
     @Override
@@ -105,68 +101,13 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult>, Ad
         }
 
         mImageView = (ImageView) findViewById(R.id.imageView);
+        Intent intent = getIntent();
+        mCurrentPhotoPath = intent.getStringExtra("picture");
 
-        /**
-         * spinner for state code
-         */
-        spinner = (Spinner) findViewById(R.id.state_spinner);
-        spinner.setSelected(false);
-        spinner.setOnItemSelectedListener(this);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.states, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        /**
-         * spinner for plate
-         */
-        tempList = new ArrayList<>(10);
-        plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
-        plateAdaptor = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, tempList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        plateSpinner.setOnItemSelectedListener(this);
-        plateSpinner.setAdapter(plateAdaptor);
-
-        errorText = (TextView) findViewById(R.id.errorTextView);
-
-        plateText = (EditText) findViewById(R.id.plateTextView);
-        plateText.setVisibility(View.INVISIBLE);
-
+        handleBigCameraPhoto();
+        startScanPlate();
 
     }
-
-    private void selectState() {
-        Spinner spin = (Spinner) findViewById(R.id.state_spinner);
-        state = spin.getSelectedItem().toString();
-        Log.d(TAG, "Selected State: " + state);
-    }
-
-    private void selectPlate(AlprResult alprResult) {
-        final List<AlprCandidate> candList = alprResult.getCandidates();
-        plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
-
-        for (int i = 0; i <candList.size(); i++) {
-            tempList.add(i,String.valueOf(candList.get(i).getPlate() + "\t" + candList.get(i).getConfidence()));
-            Log.d(TAG, String.valueOf(tempList.get(i)));
-
-        }
-
-        runOnUiThread(new Runnable() {
-            public void run() {
-                plateAdaptor.clear();
-                plateAdaptor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                plateAdaptor.notifyDataSetChanged();
-                plateSpinner.setAdapter(plateAdaptor);
-            }
-        });
-
-//        int index = plateSpinner.getSelectedItemPosition();
-//
-//        plateText.setText(candList.get(index).getPlate());
-
-//        Log.d(TAG, "Selected plate: " + plate);
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -187,32 +128,34 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult>, Ad
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
 
-                mCurrentPhotoPath = data.getExtras().getString("picture");
+    public void startScanPlate() {
+        final String openAlprConfFile = ANDROID_DATA_DIR + File.separatorChar +
+                RUNTIME_DATA_DIR_ASSET + File.separatorChar + OPENALPR_CONF_FILE;
+        handleBigCameraPhoto();
+        onProgressUpdate();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                result = Alpr.Factory.create().recognizeWithCountryRegionNConfig("us", "", mCurrentPhotoPath, openAlprConfFile, 10);
 
-                Log.d(TAG, "Picture Past" + mCurrentPhotoPath);
+                Log.d("OPEN ALPR", result);
 
-
-                final String openAlprConfFile = ANDROID_DATA_DIR + File.separatorChar +
-                        RUNTIME_DATA_DIR_ASSET + File.separatorChar + OPENALPR_CONF_FILE;
-                handleBigCameraPhoto();
-
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        String result = Alpr.Factory.create().recognizeWithCountryRegionNConfig("us", "", mCurrentPhotoPath, openAlprConfFile, 10);
-
-                        Log.d("OPEN ALPR", result);
-
-                        alprResult = processJsonResult(result);
-                    }
-                });
-
+                alprResult = processJsonResult(result);
             }
+        });
+
+    }
+
+    @Override
+    public void onPreExecute() {
+        onProgressUpdate();
+    }
+
+    @Override
+    public void onProgressUpdate() {
+        if (progressDialog == null) {
+            prepareProgressDialog();
         }
     }
 
@@ -234,6 +177,8 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult>, Ad
         alprResult.setProcessingTime(jsonObject.getLong("processing_time_ms"));
         AlprResultItem alprResultItem = null;
 
+
+
         for (int i = 0; i < resultArray.length(); i++) {
             JSONObject resultObject = resultArray.getJSONObject(i);
             alprResultItem = new AlprResultItem();
@@ -245,14 +190,18 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult>, Ad
             Log.d(TAG, candidatesArray.toString());
             Log.d(TAG, String.valueOf(candidatesArray.length()));
 
-
+            candidateList = new ArrayList<>();
+            plateArray = new String[candidatesArray.length()];
 
             for(int j = 0 ; j < candidatesArray.length(); j++) {
                 AlprCandidate alprCandidate = new AlprCandidate();
                 JSONObject candidateObject = candidatesArray.getJSONObject(j);
                 alprCandidate.setConfidence(candidateObject.getDouble("confidence"));
                 alprCandidate.setPlate(candidateObject.getString("plate"));
+                candidateList.add(j, candidateObject.getString("plate") + "\t\t" + candidateObject.getDouble("confidence"));
+                plateArray[j] = candidateObject.getString("plate");
                 alprResult.addCandidate(alprCandidate);
+//
             }
 
             alprResultItem.setPlate(resultObject.getString("plate"));
@@ -265,58 +214,24 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult>, Ad
 
     @Override
     public void onPostExecute(AlprResult alprResult) {
-        if (alprResult.isRecognized()) {
 
-            selectPlate(alprResult);
-   //         cleanUp();
-        } else {
-            setErrorText(getString(R.string.recognition_error));
-            cleanUp();
-        }
-    }
+        Intent intent = new Intent(this, VerifyPlateActivity.class);
+        intent.putExtra("picture", mCurrentPhotoPath);
+        intent.putExtra("recognized", alprResult.isRecognized());
+        intent.putExtra("plateList", plateArray);
+        intent.putStringArrayListExtra("candidateList", candidateList);
+        progressDialog.dismiss();
+        startActivity(intent);
 
-    private void setErrorText(String text) {
-        errorText.setText(text);
-    }
-
-    @Override
-    public void onPreExecute() {
-        onProgressUpdate();
-    }
-
-    @Override
-    public void onProgressUpdate() {
-        if (progressDialog == null) {
-            prepareProgressDialog();
-        }
-    }
-
-    private void cleanUp() {
-//        progressDialog.dismiss();
-//        progressDialog = null;
-//        FragmentManager fm = getFragmentManager();
-//        AlprFragment alprFragment = (AlprFragment) fm.findFragmentByTag(ALPR_FRAGMENT_TAG);
-//        fm.beginTransaction().remove(alprFragment).commitAllowingStateLoss();
+        Log.d(TAG, "AFTER PROCESSING IMAGE");
+        Log.d(TAG, String.valueOf(alprResult.getCandidates().size()));
     }
 
     private void prepareProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setMessage("Processing Image data");
+        progressDialog.setMessage("Processing Image");
         progressDialog.show();
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        selectState();
-
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-        // method needed for adaptor view
-        // Do nothing
-
     }
 
     @Override
@@ -425,27 +340,6 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult>, Ad
 		/* Associate the Bitmap to the ImageView */
         mImageView.setImageBitmap(bitmap);
         mImageView.setVisibility(View.VISIBLE);
-    }
-
-
-    private void displayImage() {
-        Picasso.with(this)
-                .load(mCurrentPhotoPath)
-                .resize(mImageView.getWidth(), mImageView.getHeight())
-                .into(mImageView);
-    }
-
-    public void takePicture(View view) {
-        setErrorText("");
-        Intent takePictureIntent = new Intent(this, CameraActivity.class);
-
-        startActivityForResult(takePictureIntent, REQUEST_CODE);
-    }
-
-    public void enterText(View view) {
-        plateText = (EditText) findViewById(R.id.plateTextView);
-        plateText.setVisibility(View.VISIBLE);
-
     }
 
 }

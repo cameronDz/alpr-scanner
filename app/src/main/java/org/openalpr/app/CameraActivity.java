@@ -235,10 +235,15 @@ public class CameraActivity extends AppCompatActivity {
                 refreshGallery(outFile);
                 tempFilePath = outFile.getAbsolutePath();
 
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra("picture", tempFilePath);
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
+//                Intent returnIntent = new Intent();
+//                returnIntent.putExtra("picture", tempFilePath);
+//                setResult(Activity.RESULT_OK, returnIntent);
+//                finish();
+
+                Intent intent = new Intent(context, ScanPlate.class);
+                intent.putExtra("picture", tempFilePath);
+                CameraActivity.this.startActivity(intent);
+
 
 
             } catch (IOException e) {
