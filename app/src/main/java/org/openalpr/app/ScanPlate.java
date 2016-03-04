@@ -37,6 +37,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openalpr.Alpr;
 
+/**
+ *  Create by Travis
+ *
+ *  Takes the image path from the just taken picture form cameraActivity and sends it to
+ *  the ALPR function to retrieve the plate number if successful.
+ *
+ *  returns error if unsuccessful
+ *
+ *  Upon completion directs to VerifyPlateActivity
+ */
+
 public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
     private static final String TAG = "ScanPlate: ";
@@ -113,6 +124,12 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
     }
 
 
+    /**
+     * Methon that makes the call to the ALRP, sets up the file paths
+     * alpr returns json string of results
+     *
+     *
+     */
     public void startScanPlate() {
         final String openAlprConfFile = ANDROID_DATA_DIR + File.separatorChar +
                 RUNTIME_DATA_DIR_ASSET + File.separatorChar + OPENALPR_CONF_FILE;
@@ -143,6 +160,14 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         }
     }
 
+    /**
+     * check for error
+     * If no error make the json string a json object to be parsed
+     *
+     * @param result
+     * @return
+     */
+
     private AlprResult processJsonResult(String result) {
         AlprResult alprResult = new AlprResult();
         try {
@@ -155,6 +180,14 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         onPostExecute(alprResult);
         return alprResult;
     }
+
+    /**
+     * Parse the json object of results to get plate numbers and confidences
+     *
+     * @param jsonObject
+     * @param alprResult
+     * @throws JSONException
+     */
 
     private void addResult(JSONObject jsonObject, AlprResult alprResult) throws JSONException {
         JSONArray resultArray = jsonObject.getJSONArray(JSON_RESULT_ARRAY_NAME);
@@ -185,7 +218,6 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
                 candidateList.add(j, candidateObject.getString("plate") + "\t\t" + candidateObject.getDouble("confidence"));
                 plateArray[j] = candidateObject.getString("plate");
                 alprResult.addCandidate(alprCandidate);
-//
             }
 
             alprResultItem.setPlate(resultObject.getString("plate"));
@@ -196,6 +228,12 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         }
     }
 
+    /**
+     * After all needed data, plate and confidences have been retrieved call verifyplate activity
+     * passing the needed array of plates, list of confidence, and image path
+     *
+     * @param alprResult
+     */
     @Override
     public void onPostExecute(AlprResult alprResult) {
 
@@ -210,6 +248,10 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         Log.d(TAG, "AFTER PROCESSING IMAGE");
         Log.d(TAG, String.valueOf(alprResult.getCandidates().size()));
     }
+
+    /**
+     * simple progress spinner that displays for user to indicate the image is being processed
+     */
 
     private void prepareProgressDialog() {
         progressDialog = new ProgressDialog(this);
@@ -230,7 +272,15 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
     }
 
-
+    /**
+     * These three methods are used for setting up the proper file path to the needed settings file
+     * for the alpr function call to native C code
+     *
+     * @param assetManager
+     * @param fromAssetPath
+     * @param toPath
+     * @return
+     */
     private static boolean copyAssetFolder(AssetManager assetManager,
                                            String fromAssetPath, String toPath) {
         try {
@@ -283,6 +333,9 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
     }
 
 
+    /**
+     * these two functions are used for loading the image to the screen
+     */
     private void handleBigCameraPhoto() {
 
         if (mCurrentPhotoPath != null) {
