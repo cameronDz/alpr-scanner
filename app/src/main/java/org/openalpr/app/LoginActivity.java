@@ -40,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         context = getApplicationContext();
 
+        gcm = GoogleCloudMessaging.getInstance(context);
         // Register an InstanceID
         Log.v(TAG, "GCM_REGISTER BEFORE " + Constants.INST_ID);
         Constants.INST_ID =  InstanceID.getInstance(context).getId();
@@ -99,7 +100,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
         //gcm sends hi message to server
-        gcm = GoogleCloudMessaging.getInstance(context);
         Log.v("GCM_PRINT gcm: ", gcm.toString());
         new AsyncTask<Void, Void, String>() {
             @Override
@@ -109,10 +109,10 @@ public class LoginActivity extends AppCompatActivity {
                     Bundle data = new Bundle();
                     data.putString("my_message", "Hello World");
                     data.putString("my_action", "SAY_HELLO");
-                    data.putString("my_action2", "SAY_HELLO");
-                    data.putString("my_action3", "SAY_HELLO");
-                    data.putString("my_action4", "SAY_HELLO");
-                    data.putString("my_action5", "SAY_HELLO");
+                    data.putString("my_action2", "SAY_HELLO2");
+                    data.putString("my_action3", "SAY_HELLO3");
+                    data.putString("my_action4", "SAY_HELLO4");
+                    data.putString("my_action5", "SAY_HELLO5");
                     String id = Integer.toString(Constants.MSG_ID) + "alpr";
                     Constants.MSG_ID++;
                     Log.v(TAG, "GCM_SEND BEFORE_TOKEN: " + Constants.REG_TOKEN);
