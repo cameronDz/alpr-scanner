@@ -3,10 +3,16 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
 
 /**
  * Created by Anthony Brignano on 2/26/16.
@@ -39,6 +45,8 @@ public class HomeActivity extends AppCompatActivity {
         // sets the message to be displayed inside the TextView
         welcome_text.setText(message);
         context = this;
+
+
     }
 
     public void redirectToInbox(View view) {
