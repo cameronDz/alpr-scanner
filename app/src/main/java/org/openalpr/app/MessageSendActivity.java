@@ -2,25 +2,17 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 import android.os.AsyncTask;
-=======
->>>>>>> gcm
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
->>>>>>> master
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-
 import java.io.IOException;
 
 
@@ -51,17 +43,9 @@ public class MessageSendActivity extends AppCompatActivity {
 
     private String plate;
 
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
     private String message;
 
     private GoogleCloudMessaging gcm = null;
-=======
-
->>>>>>> master
->>>>>>> gcm
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

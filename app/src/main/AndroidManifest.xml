@@ -54,11 +54,8 @@
         </activity>
 
         <activity android:name=".CameraActivity" />
-<<<<<<< HEAD
         <activity android:name=".ScanPlate"/>
-=======
-        <activity android:name=".ScanPlate" />
->>>>>>> gcm
+
             <!--android:screenOrientation="portrait"/>-->
         <activity android:name=".MessageSendActivity" />
         <activity android:name=".VerifyPlateActivity"/>
