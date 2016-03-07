@@ -29,11 +29,15 @@ import java.io.IOException;
 public class HomeActivity extends AppCompatActivity {
     private String TAG = "HomeActivity";
     private Context context;
+    protected GoogleCloudMessaging gcm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        context = getApplicationContext();
+
+        gcm = GoogleCloudMessaging.getInstance(context);
 
         // Locate TextView that displays welcome message
         TextView welcome_text =(TextView)findViewById(R.id.text_welcome);
@@ -44,9 +48,45 @@ public class HomeActivity extends AppCompatActivity {
 
         // sets the message to be displayed inside the TextView
         welcome_text.setText(message);
-        context = this;
 
 
+        //gcm sends hi message to server
+        Log.v("GCM_PRINT gcm: ", gcm.toString());
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "Sent message";
+                try {
+                    Bundle data = new Bundle();
+                    data.putString("my_message", "Hello World");
+                    data.putString("my_action", "SAY_HELLO");
+                    data.putString("my_action2", "SAY_HELLO2");
+                    data.putString("my_action3", "SAY_HELLO3");
+                    data.putString("my_action4", "SAY_HELLO4");
+                    data.putString("my_action5", "SAY_HELLO5");
+                    String id = Integer.toString(Constants.MSG_ID) + "alpr";
+                    Constants.MSG_ID++;
+                    Log.v(TAG, "GCM_SEND BEFORE_TOKEN: " + Constants.REG_TOKEN);
+                    Log.v(TAG, "GCM_SEND BEFORE_PROJECT_ID: " + Constants.PROJECT_ID);
+                    gcm.send(Constants.PROJECT_ID + "@gcm.googleapis.com", id, data);
+                    Log.v(TAG, "GCM_SEND AFTER_data: " + data.toString());
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+                    Log.v(TAG, "GCM_SEND " + msg);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    msg = "Error : " + e.getMessage();
+                    Log.v(TAG, "GCM_SEND " + msg);
+                }
+                return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                // mDisplay.append(msg + "\n");
+            }
+        }.execute(null, null, null);
     }
 
     public void redirectToInbox(View view) {

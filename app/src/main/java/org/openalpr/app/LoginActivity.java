@@ -1,6 +1,5 @@
 package org.openalpr.app;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -25,7 +24,6 @@ import java.io.IOException;
  *      - Login(View): parses user credentials entered into the views TextFields
  *      - onActivityResult(int, int, Intent):
  *      - onCreate(Bundle)
- *
  */
 
 public class LoginActivity extends AppCompatActivity {
@@ -45,7 +43,6 @@ public class LoginActivity extends AppCompatActivity {
         Log.v(TAG, "GCM_REGISTER BEFORE " + Constants.INST_ID);
         Constants.INST_ID =  InstanceID.getInstance(context).getId();
         Log.v(TAG, "GCM_REGISTER AFTER " + Constants.INST_ID);
-
 
         // Get token
         new AsyncTask<Void, Void, String>() {
@@ -69,15 +66,12 @@ public class LoginActivity extends AppCompatActivity {
                 return msg;
             }
 
-
-
             @Override
             protected void onPostExecute(String msg) {
                 // mDisplay.append(msg + "\n");
+                Log.v(TAG, "GCM_TOKE: LEAVING LEAVING LEAVING");
             }
         }.execute(null, null, null);
-
-
     }
 
     public void Login(View view) {
@@ -98,43 +92,10 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Username: " + username);
         Log.d(TAG, "Password: " + password);
 
-
-        //gcm sends hi message to server
-        Log.v("GCM_PRINT gcm: ", gcm.toString());
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg = "Sent message";
-                try {
-                    Bundle data = new Bundle();
-                    data.putString("my_message", "Hello World");
-                    data.putString("my_action", "SAY_HELLO");
-                    data.putString("my_action2", "SAY_HELLO2");
-                    data.putString("my_action3", "SAY_HELLO3");
-                    data.putString("my_action4", "SAY_HELLO4");
-                    data.putString("my_action5", "SAY_HELLO5");
-                    String id = Integer.toString(Constants.MSG_ID) + "alpr";
-                    Constants.MSG_ID++;
-                    Log.v(TAG, "GCM_SEND BEFORE_TOKEN: " + Constants.REG_TOKEN);
-                    Log.v(TAG, "GCM_SEND BEFORE_PROJECT_ID: " + Constants.PROJECT_ID);
-                    gcm.send(Constants.PROJECT_ID + "@gcm.googleapis.com", id, data);
-                    Log.v(TAG, "GCM_SEND AFTER_data: " + data.toString());
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-                    Log.v(TAG, "GCM_SEND Error");
-                }
-                return msg;
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                // mDisplay.append(msg + "\n");
-            }
-        }.execute(null, null, null);
-
         // Logic needs to be added to this variable based on the database interaction(s)
         Boolean loginSuccess = true;
 
+        // changed for gcm test
         if(loginSuccess){
             Intent intent = new Intent(context, HomeActivity.class);
             startActivity(intent);
@@ -146,15 +107,13 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-
     @Override
     protected void onActivityResult(int requestCode,
-                                    int resultCode, Intent intent) {
+                                    int resultCode,
+                                    Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
         Intent scanIntent = new Intent(this, ScanPlate.class);
-
         String platePath = intent.getStringExtra("picture");
 
         scanIntent.putExtra("platepicture", platePath);
@@ -163,6 +122,5 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Image file path: " + platePath);
 
         startActivity(scanIntent);
-
     }
 }
