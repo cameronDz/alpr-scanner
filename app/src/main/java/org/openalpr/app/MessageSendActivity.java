@@ -75,7 +75,9 @@ public class MessageSendActivity extends AppCompatActivity {
 
         // displays message to user
         int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, message, duration);
+        Toast toast = Toast.makeText(context,
+                message + "\nPlate: " + plate + "\nState: " + state,
+                duration);
         toast.show();
     }
 

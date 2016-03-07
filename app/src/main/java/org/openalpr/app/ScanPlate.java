@@ -3,7 +3,9 @@ package org.openalpr.app;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -94,6 +96,13 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
                     ANDROID_DATA_DIR + File.separatorChar + RUNTIME_DATA_DIR_ASSET);
         }
 
+        int currentOrientation = getResources().getConfiguration().orientation;
+        if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        }
+        else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        }
         mImageView = (ImageView) findViewById(R.id.imageView);
         Intent intent = getIntent();
         mCurrentPhotoPath = intent.getStringExtra("picture");
@@ -334,49 +343,21 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
 
     /**
-     * these two functions are used for loading the image to the screen
+     * Display the image used for loading the image to the screen
+     *
      */
     private void handleBigCameraPhoto() {
 
         if (mCurrentPhotoPath != null) {
-            setPic();
-            //mCurrentPhotoPath = null;
+
+            mImageView = (ImageView) findViewById(R.id.imageView);
+            Picasso.with(this)
+                    .load(new File(mCurrentPhotoPath))
+                    .resize(600, 600)
+                    .into(mImageView);
+
         }
     }
 
-    private void setPic() {
-
-		/* There isn't enough memory to open up more than a couple camera photos */
-        /* So pre-scale the target bitmap into which the file is decoded */
-
-		/* Get the size of the ImageView */
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-		/* Get the size of the image */
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-		/* Figure out which way needs to be reduced less */
-        int scaleFactor = 1;
-        if ((targetW > 0) || (targetH > 0)) {
-            scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-        }
-
-		/* Set bitmap options to scale the image decode target */
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-		/* Decode the JPEG file into a Bitmap */
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-
-		/* Associate the Bitmap to the ImageView */
-        mImageView.setImageBitmap(bitmap);
-        mImageView.setVisibility(View.VISIBLE);
-    }
 
 }
