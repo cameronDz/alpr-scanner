@@ -166,11 +166,19 @@ public class CameraActivity extends AppCompatActivity implements
         public void onPictureTaken(byte[] data, Camera camera) {
             // calls async task to save images without interrupting application
             new SaveImageTask().execute(data);
-//            Double lng = mLatLng.longitude;
-//            Double lat = mLatLng.latitude;
-//            String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
-//            Log.d(TAG,"Current LatLng: " + latlng);
-//            Log.d(TAG, "onPictureTaken - jpeg");
+            /**
+             * will have to move the getting of latitude and longitude to where the intent is for
+             * directing to the next activity so that they can be passes as intent extras to be
+             * available
+             */
+            if(mLatLng != null) {
+                Double lng = mLatLng.longitude;
+                Double lat = mLatLng.latitude;
+                String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+                Log.d(TAG, "Current LatLng: " + latlng);
+                Log.d(TAG, "onPictureTaken - jpeg");
+
+            }
             // camera.startPreview();
         }
     };

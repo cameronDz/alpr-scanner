@@ -3,7 +3,9 @@ package org.openalpr.app;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -36,6 +38,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openalpr.Alpr;
+
+/**
+ *  Create by Travis
+ *
+ *  Takes the image path from the just taken picture form cameraActivity and sends it to
+ *  the ALPR function to retrieve the plate number if successful.
+ *
+ *  returns error if unsuccessful
+ *
+ *  Upon completion directs to VerifyPlateActivity
+ */
 
 public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
@@ -83,6 +96,13 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
                     ANDROID_DATA_DIR + File.separatorChar + RUNTIME_DATA_DIR_ASSET);
         }
 
+        int currentOrientation = getResources().getConfiguration().orientation;
+        if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        }
+        else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        }
         mImageView = (ImageView) findViewById(R.id.imageView);
         Intent intent = getIntent();
         mCurrentPhotoPath = intent.getStringExtra("picture");
@@ -113,6 +133,12 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
     }
 
 
+    /**
+     * Methon that makes the call to the ALRP, sets up the file paths
+     * alpr returns json string of results
+     *
+     *
+     */
     public void startScanPlate() {
         final String openAlprConfFile = ANDROID_DATA_DIR + File.separatorChar +
                 RUNTIME_DATA_DIR_ASSET + File.separatorChar + OPENALPR_CONF_FILE;
@@ -143,6 +169,14 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         }
     }
 
+    /**
+     * check for error
+     * If no error make the json string a json object to be parsed
+     *
+     * @param result
+     * @return
+     */
+
     private AlprResult processJsonResult(String result) {
         AlprResult alprResult = new AlprResult();
         try {
@@ -155,6 +189,14 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         onPostExecute(alprResult);
         return alprResult;
     }
+
+    /**
+     * Parse the json object of results to get plate numbers and confidences
+     *
+     * @param jsonObject
+     * @param alprResult
+     * @throws JSONException
+     */
 
     private void addResult(JSONObject jsonObject, AlprResult alprResult) throws JSONException {
         JSONArray resultArray = jsonObject.getJSONArray(JSON_RESULT_ARRAY_NAME);
@@ -185,7 +227,6 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
                 candidateList.add(j, candidateObject.getString("plate") + "\t\t" + candidateObject.getDouble("confidence"));
                 plateArray[j] = candidateObject.getString("plate");
                 alprResult.addCandidate(alprCandidate);
-//
             }
 
             alprResultItem.setPlate(resultObject.getString("plate"));
@@ -196,6 +237,12 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         }
     }
 
+    /**
+     * After all needed data, plate and confidences have been retrieved call verifyplate activity
+     * passing the needed array of plates, list of confidence, and image path
+     *
+     * @param alprResult
+     */
     @Override
     public void onPostExecute(AlprResult alprResult) {
 
@@ -210,6 +257,10 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         Log.d(TAG, "AFTER PROCESSING IMAGE");
         Log.d(TAG, String.valueOf(alprResult.getCandidates().size()));
     }
+
+    /**
+     * simple progress spinner that displays for user to indicate the image is being processed
+     */
 
     private void prepareProgressDialog() {
         progressDialog = new ProgressDialog(this);
@@ -230,7 +281,15 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
     }
 
-
+    /**
+     * These three methods are used for setting up the proper file path to the needed settings file
+     * for the alpr function call to native C code
+     *
+     * @param assetManager
+     * @param fromAssetPath
+     * @param toPath
+     * @return
+     */
     private static boolean copyAssetFolder(AssetManager assetManager,
                                            String fromAssetPath, String toPath) {
         try {
@@ -283,47 +342,22 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
     }
 
 
+    /**
+     * Display the image used for loading the image to the screen
+     *
+     */
     private void handleBigCameraPhoto() {
 
         if (mCurrentPhotoPath != null) {
-            setPic();
-            //mCurrentPhotoPath = null;
+
+            mImageView = (ImageView) findViewById(R.id.imageView);
+            Picasso.with(this)
+                    .load(new File(mCurrentPhotoPath))
+                    .resize(600, 600)
+                    .into(mImageView);
+
         }
     }
 
-    private void setPic() {
-
-		/* There isn't enough memory to open up more than a couple camera photos */
-        /* So pre-scale the target bitmap into which the file is decoded */
-
-		/* Get the size of the ImageView */
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-		/* Get the size of the image */
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-		/* Figure out which way needs to be reduced less */
-        int scaleFactor = 1;
-        if ((targetW > 0) || (targetH > 0)) {
-            scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-        }
-
-		/* Set bitmap options to scale the image decode target */
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-		/* Decode the JPEG file into a Bitmap */
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-
-		/* Associate the Bitmap to the ImageView */
-        mImageView.setImageBitmap(bitmap);
-        mImageView.setVisibility(View.VISIBLE);
-    }
 
 }

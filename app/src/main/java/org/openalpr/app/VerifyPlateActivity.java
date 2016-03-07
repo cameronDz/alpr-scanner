@@ -16,6 +16,19 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+
+import static org.openalpr.app.AppConstants.JSON_RESULT_ARRAY_NAME;
+
+/**
+ *  Created by Travis
+ * Activity for selected plate and state for the message. Gets a list, string[], and picture
+ * from the previous activity that are used to display the plate number, confidence, and image.
+ *
+ * Can re-launce camera to take new picture
+ * Submit plate and state to message activity
+ *
+ */
 
 public class VerifyPlateActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -37,8 +50,6 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
     private TextView errorText;
 
-    private AlprResult alprResult;
-
     private String result;
 
     private ArrayList<String> candiateList;
@@ -57,8 +68,10 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         errorText.setVisibility(View.INVISIBLE);
 
         plateText = (EditText) findViewById(R.id.plateTextView);
+
         mImageView = (ImageView) findViewById(R.id.imageView);
 
+        /* gets the variables from previous activity */
         Intent intent = getIntent();
         result = intent.getStringExtra("result");
         candiateList = intent.getStringArrayListExtra("candidateList");
@@ -91,10 +104,20 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         }
     }
 
+    /**
+     * Set the error message if the plate recognition was unsucessful
+     * @param text
+     */
     private void setErrorText(String text) {
         errorText.setText(text);
     }
 
+    /**
+     * Method to display the picture taken on the screen
+     *
+     * Probably a better way is to test the device for its screen size of the imageView
+     * and set the image to its dimensions
+     */
     private void displayImage() {
         mImageView = (ImageView) findViewById(R.id.imageView);
         Picasso.with(this)
@@ -102,6 +125,15 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
                 .resize(600, 600)
                 .into(mImageView);
     }
+
+    /**
+     * OnItemSelected listener for the two spinners
+     * Used to set the plate and state
+     * @param parent
+     * @param view
+     * @param position
+     * @param id
+     */
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -134,15 +166,34 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         Variables.plate_to = plateArray[0];
         Variables.state_to = state;
 
-        Intent intent = new Intent(this, MessageActivity.class);
-        intent.putExtra("plate", plateArray[index]);
+        TextView textView = (TextView) findViewById(R.id.plateTextView);
+
+        Intent intent = new Intent(this, MessageSendActivity.class);
+        intent.putExtra("plate", textView.getText().toString());
         intent.putExtra("state", state);
         startActivity(intent);
     }
 
+    /**
+     * Onclick method for entering plate manually if not recognized in image
+     * @param view
+     */
+
     public void enterText(View view) {
-        TextView textView = (TextView) findViewById(R.id.enter_text);
+        TextView textView = (TextView) findViewById(R.id.plateTextView);
         textView.setHint("Enter Plate #");
         textView.setVisibility(View.VISIBLE);
+
+    }
+
+    /**
+     * Onclick method for "take picture" button to go back to camera activity to take new picture
+     * @param view
+     */
+
+    public void takePicture(View view) {
+
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
 }
