@@ -12,7 +12,7 @@ public class Constants {
     protected static String APPLICATION_ID = "org.openalpr.app"; // registered under project
     protected static String REG_TOKEN;
     protected static String INST_ID;
-    protected static int MSG_ID = 1111111;
+    protected static int MSG_ID = 11111;
 
     private Constants() {
         // empty

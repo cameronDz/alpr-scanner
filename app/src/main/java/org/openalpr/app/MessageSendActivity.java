@@ -2,15 +2,17 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
 
 
 /**
@@ -40,7 +42,9 @@ public class MessageSendActivity extends AppCompatActivity {
 
     private String plate;
 
+    private String message;
 
+    private GoogleCloudMessaging gcm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +63,9 @@ public class MessageSendActivity extends AppCompatActivity {
 
     }
 
-    public void sendMessage(View view){
-        ImageButton message_button = (ImageButton)view;
-        String message = message_button.getContentDescription().toString();
+    public void sendMessage(View view) {
+        ImageButton message_button = (ImageButton) view;
+        message = message_button.getContentDescription().toString();
 
 
         // displays message to user
@@ -70,7 +74,55 @@ public class MessageSendActivity extends AppCompatActivity {
                 message + "\nPlate: " + plate + "\nState: " + state,
                 duration);
         toast.show();
-    }
+
+        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "Sent message";
+                try {
+                    Bundle data = new Bundle();
+                    // sending a message
+                    data.putString("messageType", "message");
+                    data.putString("username", Variables.username);
+                    data.putString("password", Variables.password);
+                    data.putString("plateString", plate);
+                    data.putString("plateState", state);
+                    data.putString("uidFrom", "1");
+                    data.putString("timestamp", "2/20/2016 9:00:50");
+                    data.putString("message", message);
+                    data.putString("gpsLat", "-45.0001");
+                    data.putString("gpsLon", "20.0204");
+                            /* sending a new registering user
+                            data.putString("messageType", "register_user");
+                            data.putString("username", "test_user000");
+                            data.putString("password", "test_pass");
+                            data.putString("plateString", "ABC123");
+                            data.putString("plateState", "CT");
+                            */
+                    String id = Integer.toString(Constants.MSG_ID) + "unique3";
+                    Constants.MSG_ID++;
+                    Log.v("GCM_SEND", "BEFORE");
+                    Log.v("GCM_SEND", "BEFORE_TOKEN: " + Constants.REG_TOKEN);
+                    Log.v("GCM_SEND", "BEFORE_PROJECT_ID: " + Constants.PROJECT_ID);
+                    gcm.send(Constants.PROJECT_ID + "@gcm.googleapis.com", id, data);
+                    Log.v("GCM_SEND", "AFTER gcm: " + gcm.toString());
+                    Log.v("GCM_SEND", "AFTER data: " + data.toString());
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+                    Log.v("GCM_SEND", "Error");
+                }
+                return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                // mDisplay.append(msg + "\n");
+            }
+        }.execute(null, null, null);
+}
+
 
 
 }
