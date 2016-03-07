@@ -18,6 +18,7 @@ import android.widget.TextView;
  *      - redirectToCamera(View): redirects user to CameraActivity.java (activity_camera.xml) on click
  *      - onCreate(Bundle)
  *
+ * version@(7.3.2016) user@(cameronDz) Set welcome message to include Variable.username String
  */
 
 public class HomeActivity extends AppCompatActivity {
@@ -29,26 +30,19 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Locate TextView that displays welcome message
+        // Locate and set TextView that displays welcome message
         TextView welcome_text =(TextView)findViewById(R.id.text_welcome);
-
-        // the username variable needs to be set to the User's current username
-        String username = "{username}";
-        String message = "Welcome " + username + "!";
-
-        // sets the message to be displayed inside the TextView
+        String message = "Welcome " + Variables.username + "!";
         welcome_text.setText(message);
-        context = this;
     }
 
     public void redirectToInbox(View view) {
         Intent intent = new Intent(this, InboxActivity.class);
         startActivity(intent);
     }
+
     public void redirectToCamera(View view) {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
-
-
 }

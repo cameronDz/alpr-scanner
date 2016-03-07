@@ -10,8 +10,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -50,7 +48,6 @@ public class MessageActivity extends AppCompatActivity implements
     private Location mLastLocation = null;
 
     private String state;
-
     private String plate;
 
     @Override

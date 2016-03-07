@@ -5,30 +5,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-
-import android.widget.EditText;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -95,10 +79,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         mCurrentPhotoPath = intent.getStringExtra("picture");
         displayImage();
 
-
-        /**
-         * spinner for state code
-         */
+        // spinner for state code
         stateSpinner = (Spinner) findViewById(R.id.state_spinner);
         stateSpinner.setSelected(false);
         stateSpinner.setOnItemSelectedListener(this);
@@ -108,29 +89,19 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stateSpinner.setAdapter(adapter);
 
-
-        /**
-         * spinner for plate
-         */
-
+        //spinner for plate
         plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
         plateSpinner.setOnItemSelectedListener(this);
         if (intent.getBooleanExtra("recognized", false)) {
-
             ArrayAdapter<String> plateAdaptor = new ArrayAdapter<String>(this,
                     android.R.layout.simple_spinner_item,
                     candiateList);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             plateSpinner.setAdapter(plateAdaptor);
-
-
-
         } else {
             setErrorText(getString(R.string.recognition_error));
             errorText.setVisibility(View.VISIBLE);
-
         }
-
     }
 
     /**
@@ -178,23 +149,22 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
                 index = spinner.getSelectedItemPosition();
                 Log.d(TAG, "Plate selected: " + plateArray[index]);
 
-
                 plateText.setText(plateArray[index]);
                 plateText.setVisibility(View.VISIBLE);
                 break;
         }
-
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-        /**
-         * do nothing when nothing is selected
-         */
+        //do nothing when nothing is selected
     }
 
     /** Called when the user clicks the button to verify the plate */
     public void submitPlate(View view) {
+        // send plate and state to global Variable class
+        Variables.plate_to = plateArray[0];
+        Variables.state_to = state;
 
         TextView textView = (TextView) findViewById(R.id.plateTextView);
 
