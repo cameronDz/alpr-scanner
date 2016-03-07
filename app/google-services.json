@@ -36,6 +36,38 @@
           "status": 1
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740457443747:android:c4d56469477b3af1",
+        "client_id": "android:org.myopenalpr.app",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "org.myopenalpr.app",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 2,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
     }
   ],
   "client_info": [],

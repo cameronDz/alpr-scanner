@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 /**
  * Created by Anthony Brignano on 2/19/16.
+ *
+ * version@(7.3.2016) user@(cameronDz) Sent username and password variables to global
+ * Variable static class.
  */
 
 public class RegisterActivity extends AppCompatActivity {
@@ -66,6 +69,11 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if(registrationComplete){
+
+            // save user name and password to be verified for global variables
+            Variables.username = username;
+            Variables.password = password;
+
             Intent intent = new Intent(this, ConfirmPlateActivity.class);
             startActivity(intent);
         }

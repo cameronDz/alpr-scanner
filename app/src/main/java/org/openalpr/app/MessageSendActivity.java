@@ -1,24 +1,11 @@
 package org.openalpr.app;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.maps.model.LatLng;
 
 
 /**
@@ -54,6 +41,7 @@ public class MessageSendActivity extends AppCompatActivity {
     public void sendMessage(View view){
         ImageButton message_button = (ImageButton)view;
         String message = message_button.getContentDescription().toString();
+
 
         // displays message to user
         int duration = Toast.LENGTH_SHORT;
