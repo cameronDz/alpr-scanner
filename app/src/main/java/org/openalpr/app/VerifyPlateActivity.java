@@ -143,6 +143,9 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
     /**
      * Method to display the picture taken on the screen
+     *
+     * Probably a better way is to test the device for its screen size of the imageView
+     * and set the image to its dimensions
      */
     private void displayImage() {
         mImageView = (ImageView) findViewById(R.id.imageView);
@@ -193,8 +196,10 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
     /** Called when the user clicks the button to verify the plate */
     public void submitPlate(View view) {
 
+        TextView textView = (TextView) findViewById(R.id.plateTextView);
+
         Intent intent = new Intent(this, MessageSendActivity.class);
-        intent.putExtra("plate", plateArray[index]);
+        intent.putExtra("plate", textView.getText().toString());
         intent.putExtra("state", state);
         startActivity(intent);
     }
@@ -205,9 +210,10 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
      */
 
     public void enterText(View view) {
-        TextView textView = (TextView) findViewById(R.id.enter_text);
+        TextView textView = (TextView) findViewById(R.id.plateTextView);
         textView.setHint("Enter Plate #");
         textView.setVisibility(View.VISIBLE);
+
     }
 
     /**
