@@ -2,7 +2,13 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
+<<<<<<< HEAD
 import android.os.AsyncTask;
+=======
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Build;
+>>>>>>> master
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -42,9 +48,13 @@ public class MessageSendActivity extends AppCompatActivity {
 
     private String plate;
 
+<<<<<<< HEAD
     private String message;
 
     private GoogleCloudMessaging gcm = null;
+=======
+
+>>>>>>> master
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
