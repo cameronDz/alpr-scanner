@@ -2,7 +2,6 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,8 +13,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import java.io.IOException;
 
 /**
  * Created by Anthony Brignano on 2/23/16.
@@ -83,6 +80,8 @@ public class ConfirmPlateActivity extends AppCompatActivity
 
         if(plateConfirmationComplete){
 
+            // to be removed
+            /*
             //gcm sends hi message to server
             Log.v("GCM_PRINT gcm: ", gcm.toString());
             new AsyncTask<Void, Void, String>() {
@@ -119,6 +118,9 @@ public class ConfirmPlateActivity extends AppCompatActivity
                     // mDisplay.append(msg + "\n");
                 }
             }.execute(null, null, null);
+            */
+
+            // create a
 
 
             Intent intent = new Intent(this, HomeActivity.class);
@@ -140,7 +142,4 @@ public class ConfirmPlateActivity extends AppCompatActivity
         Toast toast = Toast.makeText(context, message, duration);
         toast.show();
     }
-
-
-
 }

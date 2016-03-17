@@ -107,7 +107,8 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Password: " + password);
 
         // Logic needs to be added to this variable based on the database interaction(s)
-        Boolean loginSuccess = true;
+        Boolean loginSuccess = false;
+
 
         // changed for gcm test
         if (loginSuccess) {
