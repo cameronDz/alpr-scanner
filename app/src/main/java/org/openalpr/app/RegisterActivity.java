@@ -16,7 +16,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +33,6 @@ import org.json.JSONObject;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    protected GoogleCloudMessaging gcm = null;
     private String TAG = "RegisterActivity";
     private Context context;
 
@@ -45,6 +43,16 @@ public class RegisterActivity extends AppCompatActivity {
         context = this;
     }
 
+    /**
+     * FORMAT: "variable_name - function"
+     *
+     * u - EditText variable for text input in username field
+     * p - EditText variable for text input in password field
+     * cp - EditText variable for text input in confirm_password field
+     * username - String variable for text in username field
+     * password - String variable for text in password field
+     * confirm_password - String variable for text in password field
+     */
     public void Register(View view) {
         EditText u = (EditText)findViewById(R.id.username);
         EditText p = (EditText)findViewById(R.id.password);
@@ -56,25 +64,11 @@ public class RegisterActivity extends AppCompatActivity {
         Log.d(TAG, "Password: " + password);
         Log.d(TAG, "Confirm Password: " + confirm_password);
 
-        // Logic needs to be added to this variable based on the database interaction(s)
+        // password check
         Boolean registrationComplete = false;
-
-        /**
-         * FORMAT: "variable_name - function"
-         *
-         * u - EditText variable for text input in username field
-         * p - EditText variable for text input in password field
-         * cp - EditText variable for text input in confirm_password field
-         * username - String variable for text in username field
-         * password - String variable for text in password field
-         * confirm_password - String variable for text in password field
-         *
-         * */
-
         if(password.equals(confirm_password)){
             registrationComplete = true;
-        }
-        else{
+        } else {
             // displays message to user
             String message = "Passwords do not match.";
             p.setText("", TextView.BufferType.EDITABLE);
@@ -103,8 +97,8 @@ public class RegisterActivity extends AppCompatActivity {
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
         // Server address and JSONObject to be sent
-        // TODO get AWS address, make sure hard coding it is 'safe'
-        String address = "AWS.SERVER.ADDRESS";
+        // TODO TEST AWS address, make sure hard coding it is 'safe'
+        String address = "http://107.21.62.238/";
         JSONObject json = formatJSONRegister(Variables.username, Variables.password);
 
         // TODO add a check to make sure json variable is not NULL
