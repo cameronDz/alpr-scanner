@@ -12,7 +12,15 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by Anthony Brignano on 2/23/16.
@@ -20,12 +28,20 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
  * ConfirmPlateActivity: For registration of new plate
  *      (associated view activity_confirm_plate)
  *
- *      - confirmPlate(View): verifies plate credentials and redirects user to HomeActivity.java (activity_home.xml)
- *      - onItemSelected(AdapterView): sets plate_state variable to the state selected (from the spinner)
+ *      - confirmPlate(View): verifies plate credentials and redirects
+ *          user to HomeActivity.java (activity_home.xml)
+ *      - onItemSelected(AdapterView): sets plate_state variable to
+ *          the state selected (from the spinner)
  *      - onNothingSelected(AdapterView)
  *      - onCreate(Bundle)
  *
- * version@(7.3.2016) user@(cameronDz)
+ * date@(07.03.2016) editor@(cameronDz)
+ * Added GCM upstream feature. Used to register a user and a plate.
+ *
+ * date@(17.3.2016) editor@(cameronDz)
+ * Removed GCM upstream feature and replaced with HTTP Volley POST
+ * request that handles responses from server as well. Put logs in
+ * methods. Volley needs to be tested.
  */
 
 public class ConfirmPlateActivity extends AppCompatActivity
@@ -35,10 +51,10 @@ public class ConfirmPlateActivity extends AppCompatActivity
     private Context context;
     private String plate_state = "";
     protected String plate_number = "";
-    protected GoogleCloudMessaging gcm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm_plate);
 
@@ -54,92 +70,160 @@ public class ConfirmPlateActivity extends AppCompatActivity
         spinner.setOnItemSelectedListener(this);
 
         context = this;
-
-        Log.v(TAG, "TEST TEST TEST: ");
-        Log.v(TAG, "TEST TEST TEST: Variables.username = " + Variables.username);
-        Log.v(TAG, "TEST TEST TEST: Variables.password = " + Variables.password);
-        Log.v(TAG, "TEST TEST TEST: ");
     }
 
+    /**
+     * User presses confirm plate, data sent out to server to check plate
+     * @param view current view: plate confirmation view
+     */
     public void confirmPlate(View view) {
+        Log.d(TAG, "ConfirmPlate Button Pressed");
         EditText p = (EditText)findViewById(R.id.plate_number);
         plate_number = p.getText().toString();
         context = getApplicationContext();
 
-        gcm = GoogleCloudMessaging.getInstance(context);
-
-        Log.d(TAG, "Plate Number: " + plate_number);
-        Log.d(TAG, "Plate State: " + plate_state);
-
-        // for sending gcm
+        // store user selected plate/state in global variables
         Variables.user_plate = this.plate_number;
         Variables.user_state = this.plate_state;
 
-        // Logic needs to be added to this variable based on the database interaction(s)
-        Boolean plateConfirmationComplete = true;
-
-        if(plateConfirmationComplete){
-
-            // to be removed
-            /*
-            //gcm sends hi message to server
-            Log.v("GCM_PRINT gcm: ", gcm.toString());
-            new AsyncTask<Void, Void, String>() {
-                @Override
-                protected String doInBackground(Void... params) {
-                    String msg = "Sent message";
-                    try {
-                        Bundle data = new Bundle();
-                        data.putString("messageType", "register_user");
-                        data.putString("username", Variables.username);
-                        data.putString("password", Variables.password);
-                        data.putString("plateString", Variables.user_plate);
-                        data.putString("plateState", Variables.user_state);
-                        String id = Integer.toString(Constants.MSG_ID) + "alpr";
-                        Constants.MSG_ID++;
-                        Log.v(TAG, "GCM_SEND BEFORE_TOKEN: " + Constants.REG_TOKEN);
-                        Log.v(TAG, "GCM_SEND BEFORE_PROJECT_ID: " + Constants.PROJECT_ID);
-                        gcm.send(Constants.PROJECT_ID + "@gcm.googleapis.com", id, data);
-                        Log.v(TAG, "GCM_SEND AFTER_data: " + data.toString());
-                    } catch (IOException ex) {
-                        msg = "Error :" + ex.getMessage();
-                        Log.v(TAG, "GCM_SEND " + msg);
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                        msg = "Error : " + e.getMessage();
-                        Log.v(TAG, "GCM_SEND " + msg);
-                    }
-                    return msg;
-                }
-
-                @Override
-                protected void onPostExecute(String msg) {
-                    // mDisplay.append(msg + "\n");
-                }
-            }.execute(null, null, null);
-            */
-
-            // create a
-
-
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
-        }
+        // data sent out to server using Volley HTTP POST. determines if plate
+        // is available and sends user to activity according to response
+        // TODO TEST to make sure connection is being made
+        sendDataToServer();
     }
 
-    public void onItemSelected(AdapterView<?> parent, View view,
-                               int pos, long id) {
-        // An item was selected. You can retrieve the selected item using
+    /**
+     * Determines the state for the license plate by getting it from a spinner which
+     * a user selects from on the GUI
+     * @param parent AdapterView for spinner
+     * @param view View spinner is in
+     * @param pos position of spinner -- state being selected
+     * @param id id in XML of spinner
+     */
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        //  retrieve the selected item from spinner
         Object s = parent.getItemAtPosition(pos);
         plate_state = s.toString();
     }
 
+    /**
+     * Error message for no state being selected.
+     * @param parent Adapter View for spinner
+     */
     public void onNothingSelected(AdapterView<?> parent) {
-        // Another interface callback
+        // interface callback
         String message = "Error: No state selected.";
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, message, duration);
         toast.show();
+    }
+
+    /**
+     * Used to send plate registration data to server
+     */
+    private void sendDataToServer() {
+        Log.d(TAG, "sendDataToServer");
+
+        // requests queue to be sent to server
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        // format data to be sent to server and address to send to
+        JSONObject plate = formatJSONPlate();
+        //TODO make address a constant global variable
+        String address = "http://107.21.62.238/";
+
+        //TODO create error logic for checking JSON
+
+        //TODO create request and response
+        // new request to be sent out to server
+        Log.d(TAG, "create and send JSON POST request");
+        JsonObjectRequest jsonRequest = new JsonObjectRequest
+                (Request.Method.POST, address, plate,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                // break down JSON response from server, send user to new
+                                // activity if successful registration, or inform of fail
+                                interpretResponse(response);
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                // TODO create error listener
+                            }
+                        });
+
+        // new request added to queue
+        queue.add(jsonRequest);
+    }
+
+    /**
+     * Interprets the response from the server and informs user of plate
+     * registration success/failure
+     * @param response the JSON response from a server
+     */
+    private void interpretResponse(JSONObject response) {
+        Log.d(TAG, "interpretResponse");
+
+        //attempt to breakdown server JSON response
+        try {
+            // TODO make sure server is returning expected JSON (ask Connor or Matt)
+
+            // TODO check to make sure breaking down JSON correctly
+            String plateStatus = response.get("plate_register").toString();
+            // logic checking plate was registered, redirecting user accordingly
+            if( plateStatus.equals("success") ) {
+                Log.d(TAG, "interpretResponse: success");
+
+                // TODO Toast user about success
+
+                // send user to home activity
+                Intent intent = new Intent(this, HomeActivity.class);
+                startActivity(intent);
+            } else if (plateStatus.equals("failure") ) {
+                Log.d(TAG, "interpretResponse: failure");
+
+                // clear plate global variables
+                Variables.user_plate = "";
+                Variables.user_state = "";
+
+                // TODO add Toast explaining to user of failure
+                // TODO reset activity or tell user to re-enter plate
+
+            }
+        } catch (JSONException je) {
+            je.printStackTrace();
+            Log.e(TAG, "JSONException error: " + je);
+        }
+
+        // TODO figure out if user needs to be toasted about Exception error
+    }
+
+    /**
+     * @return JSON object to be sent and register a plate to a user,
+     * on JSONException error, returns NULL; if NULL is returned
+     */
+    private JSONObject formatJSONPlate() {
+        Log.d(TAG, "formatJSONRegister data to send to server");
+
+        JSONObject plate = new JSONObject();
+        try {
+            // server is set to recognize "messageType" in JSON object and
+            // process data accordingly
+            plate.put("messageType", "plate");
+            plate.put("user_id", Variables.user_id);
+            plate.put("plate_number", Variables.user_plate);
+            plate.put("plate_state", Variables.user_state);
+            //TODO TEST that this is how server is expecting JSON
+
+            return plate;
+        } catch (JSONException je) {
+            je.printStackTrace();
+            Log.d(TAG, "JSON format error" + je);
+        }
+
+        //TODO send back something besides null
+        return null;
     }
 }

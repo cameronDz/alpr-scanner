@@ -3,6 +3,10 @@ package org.openalpr.app;
 /**
  * Used to store constants in the app/persist variables.
  * Created by Cameron on 3/4/2016.
+ *
+ * date@(17.03.2016) @editor(cameronDz)
+ * TODO find more efficient way to persist variables in this class, or
+ * TODO combine with Variables class
  */
 public class Constants {
 

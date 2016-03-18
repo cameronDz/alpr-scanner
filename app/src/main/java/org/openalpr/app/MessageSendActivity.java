@@ -2,7 +2,6 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,9 +9,15 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
-import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
@@ -29,29 +34,27 @@ import java.io.IOException;
  *      - onConnectionSuspended(int)
  *      - onConnectionFailed(ConnectionResult)
  *
- * TO DO:
- *  - Add method to save which image was selected to a text file on users device
+ * TODO: Add method to save which image was selected to a text file on users device
+ *
+ * date@(17.03.2016) @editor(cameronDz)
+ *
  */
 
 public class MessageSendActivity extends AppCompatActivity {
-    private Context context;
 
     private String TAG = "MessageSendActivity";
-
+    private Context context;
     private String state;
-
     private String plate;
-
     private String message;
-
-    private GoogleCloudMessaging gcm = null;
+    // TODO get gps coordinates
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message_send);
         context = this;
-
 
         // Get the plate and save to activity
         Intent intent = getIntent();
@@ -60,13 +63,12 @@ public class MessageSendActivity extends AppCompatActivity {
 
         Log.d(TAG, "STATE: " + state);
         Log.d(TAG, "PLATE: " + plate);
-
     }
 
     public void sendMessage(View view) {
+        Log.d(TAG, "sendMessage Button Pressed");
         ImageButton message_button = (ImageButton) view;
         message = message_button.getContentDescription().toString();
-
 
         // displays message to user
         int duration = Toast.LENGTH_SHORT;
@@ -75,54 +77,119 @@ public class MessageSendActivity extends AppCompatActivity {
                 duration);
         toast.show();
 
-        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+        // send message to server
+        sendMessageToServer();
+    }
 
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg = "Sent message";
-                try {
-                    Bundle data = new Bundle();
-                    // sending a message
-                    data.putString("messageType", "message");
-                    data.putString("username", Variables.username);
-                    data.putString("password", Variables.password);
-                    data.putString("plateString", plate);
-                    data.putString("plateState", state);
-                    data.putString("uidFrom", "1");
-                    data.putString("timestamp", "2/20/2016 9:00:50");
-                    data.putString("message", message);
-                    data.putString("gpsLat", "-45.0001");
-                    data.putString("gpsLon", "20.0204");
-                            /* sending a new registering user
-                            data.putString("messageType", "register_user");
-                            data.putString("username", "test_user000");
-                            data.putString("password", "test_pass");
-                            data.putString("plateString", "ABC123");
-                            data.putString("plateState", "CT");
-                            */
-                    String id = Integer.toString(Constants.MSG_ID) + "unique3";
-                    Constants.MSG_ID++;
-                    Log.v("GCM_SEND", "BEFORE");
-                    Log.v("GCM_SEND", "BEFORE_TOKEN: " + Constants.REG_TOKEN);
-                    Log.v("GCM_SEND", "BEFORE_PROJECT_ID: " + Constants.PROJECT_ID);
-                    gcm.send(Constants.PROJECT_ID + "@gcm.googleapis.com", id, data);
-                    Log.v("GCM_SEND", "AFTER gcm: " + gcm.toString());
-                    Log.v("GCM_SEND", "AFTER data: " + data.toString());
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-                    Log.v("GCM_SEND", "Error");
-                }
-                return msg;
+    private void sendMessageToServer() {
+        Log.d(TAG, "sendMessageToServer");
+
+
+        // requests queue to be sent to server
+        RequestQueue queue = Volley.newRequestQueue(this);
+        // Server address and JSONObject to be sent
+        // TODO TEST AWS address, make sure hard coding it is 'safe'
+        String address = "http://107.21.62.238/";
+        // TODO make address a constant global variable
+        JSONObject json = formatJSONMessage(plate, state, message, 0, 0);
+        // TODO get real gps coordinates
+        // TODO add a check to make sure json variable is not NULL
+
+        // new request to be sent out to server
+        Log.d(TAG, "create and send JSON POST request");
+        JsonObjectRequest jsonRequest = new JsonObjectRequest
+                (Request.Method.POST, address, json,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                // break down JSON response from server, send user to new
+                                // activity if successful registration, or inform of fail
+                                interpretResponse(response);
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                // TODO create error listener
+                            }
+                        });
+
+        // new request added to queue
+        queue.add(jsonRequest);
+
+    }
+
+    /**
+     * Takes response from server and tells user if message was sent successfully
+     * @param response servers response to the JSON
+     */
+    private void interpretResponse(JSONObject response) {
+        Log.d(TAG, "interpretResponse");
+
+        // attempt to breakdown JSON object
+        try {
+            // TODO make sure server is returning expected JSON (ask Connor or Matt)
+
+            // TODO check to make sure breaking down JSON correctly
+            // get message status from JSON object
+            String login = response.get("status").toString();
+            if( login.equals("success") ) {
+                Log.d(TAG, "login: success");
+
+                // TODO check to make sure breaking down JSON correctly
+                // set global username
+                Variables.username = response.get("username").toString();
+
+                // TODO add a toast or popup informing user of success
+
+                // send user to home activity
+                Intent intent = new Intent(this, ConfirmPlateActivity.class);
+                startActivity(intent);
+            } else if( login.equals("fail") ) {
+                Log.d(TAG, "message: failed");
+
+                // TODO put Toast here informing user of failure
             }
+        } catch (JSONException je) {
+            je.printStackTrace();
+            Log.d(TAG, "JSONException: " + je);
+        }
 
-            @Override
-            protected void onPostExecute(String msg) {
-                // mDisplay.append(msg + "\n");
-            }
-        }.execute(null, null, null);
-}
+    }
 
+    /**
+     * Prepares JSON object message to be sent out another user
+     * @param plate plate number to send a message to
+     * @param state state of plate to send a message to
+     * @param message message identifier
+     * @param gpsLong longitudinal coordinates where plate picture was taken
+     * @param gpsLat latitudinal coordinates where plate picture was taken
+     * @return a JSON object to be sent out to server
+     */
+    private JSONObject formatJSONMessage(String plate, String state, String message,
+                                         double gpsLong, double gpsLat) {
+        Log.d(TAG, "formatJSONMessage");
+        JSONObject json = new JSONObject();
 
+        // attempt to put message into JSON object
+        try {
+            json.put("messageType","message");
+            json.put("plate_number", plate);
+            json.put("plate_state", state);
+            json.put("user_sender_id", Variables.user_id);
+            // TODO come up with a non-static timestamp
+            json.put("message_sent_timestamp","2/20/2016 9:00:50");
+            // TODO come up with real gps coordinates
+            json.put("gps_lat", gpsLat);
+            json.put("gps_lon", gpsLong);
+            json.put("message_sender_content", message);
+            // TODO TEST that this is how server is expecting JSON
+        } catch (JSONException je) {
+            je.printStackTrace();
+            Log.d(TAG, "JSONException: " + je);
+        }
 
+        // TODO find a way to not return null on error
+        return json;
+    }
 }

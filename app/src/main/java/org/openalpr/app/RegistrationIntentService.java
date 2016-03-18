@@ -3,8 +3,6 @@ package org.openalpr.app;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmPubSub;
@@ -14,7 +12,6 @@ import com.google.android.gms.iid.InstanceID;
 import java.io.IOException;
 
 /**
- *
  * Created by Cameron on 3/4/2016.
  */
 public class RegistrationIntentService extends IntentService {
@@ -28,7 +25,7 @@ public class RegistrationIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         try {
             // [START register_for_gcm]
@@ -74,8 +71,6 @@ public class RegistrationIntentService extends IntentService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        // Add custom implementation, as needed.
-
         // TODO: this needs to send AWS the registration token
     }
 
@@ -86,6 +81,7 @@ public class RegistrationIntentService extends IntentService {
      * @throws IOException if unable to reach the GCM PubSub service
      */
     // [START subscribe_topics]
+    // TODO remove this method -- should not be needed for app
     private void subscribeTopics(String token) throws IOException {
         GcmPubSub pubSub = GcmPubSub.getInstance(this);
         for (String topic : TOPICS) {

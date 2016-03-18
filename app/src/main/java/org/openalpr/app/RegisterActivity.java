@@ -23,21 +23,22 @@ import org.json.JSONObject;
 /**
  * Created by Anthony Brignano on 2/19/16.
  *
- * version@(7.3.2016) editor@(cameronDz)
+ * date@(07.03.2016) editor@(cameronDz)
  * Sent username and password variables to global Variable static class.
  *
- * version@(17.3.2016) editor(cameronDz)
+ * date@(17.03.2016) editor@(cameronDz)
  * Added JSON formatting class for registering user, removed GCM upstream,
- * added framework for Volley HTTP POST. Volley needs to be tested and tweaked.
+ * added framework for Volley HTTP POST. Put logs in methods. Volley needs
+ * to be tested and tweaked.
  */
 
 public class RegisterActivity extends AppCompatActivity {
-
     private String TAG = "RegisterActivity";
     private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         context = this;
@@ -54,55 +55,64 @@ public class RegisterActivity extends AppCompatActivity {
      * confirm_password - String variable for text in password field
      */
     public void Register(View view) {
+        Log.d(TAG, "Register Button Pressed");
+        // get user entered name and password from view
         EditText u = (EditText)findViewById(R.id.username);
         EditText p = (EditText)findViewById(R.id.password);
         EditText cp = (EditText)findViewById(R.id.confirm_password);
         String username = u.getText().toString();
         String password = p.getText().toString();
         String confirm_password = cp.getText().toString();
-        Log.d(TAG, "Username: " + username);
-        Log.d(TAG, "Password: " + password);
-        Log.d(TAG, "Confirm Password: " + confirm_password);
 
         // password check
-        Boolean registrationComplete = false;
+        Boolean passCheck = false;
         if(password.equals(confirm_password)){
-            registrationComplete = true;
+            Log.d(TAG, "Password check: Pass");
+            passCheck = true;
         } else {
-            // displays message to user
-            String message = "Passwords do not match.";
+            Log.d(TAG, "Password check: Fail");
+            // reset views password
             p.setText("", TextView.BufferType.EDITABLE);
             cp.setText("", TextView.BufferType.EDITABLE);
             int duration = Toast.LENGTH_SHORT;
+            // displays message to user if passwords don't match
+            String message = "Passwords do not match.";
             Toast toast = Toast.makeText(context, message, duration);
             toast.show();
         }
 
-        if(registrationComplete){
+        // send data to server if password check passes
+        if(passCheck){
+            Log.d(TAG, "passCheck: true");
+
             // save user name and password to be verified for global variables
             Variables.username = username;
             Variables.password = password;
 
-            // TODO TEST to make sure connection is being made
             // data sent out to server using Volley HTTP POST. determines if user
             // name is available and sends user to activity according to response
-            sendDataToSever();
+            // TODO TEST to make sure connection is being made
+            sendDataToServer();
         }
     }
 
     /**
      * Sends registration data to server
      */
-    private void sendDataToSever() {
+    private void sendDataToServer() {
+        Log.d(TAG, "sendDataToServer");
+
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
         // Server address and JSONObject to be sent
         // TODO TEST AWS address, make sure hard coding it is 'safe'
         String address = "http://107.21.62.238/";
-        JSONObject json = formatJSONRegister(Variables.username, Variables.password);
-
+        // TODO make address a constant global variable
+        JSONObject json = formatJSONRegister();
         // TODO add a check to make sure json variable is not NULL
+
         // new request to be sent out to server
+        Log.d(TAG, "create and send JSON POST request");
         JsonObjectRequest jsonRequest = new JsonObjectRequest
             (Request.Method.POST, address, json,
                 new Response.Listener<JSONObject>() {
@@ -110,11 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         // break down JSON response from server, send user to new
                         // activity if successful registration, or inform of fail
-                        if( interpretResponse(response) ) {
-                            success();
-                        } else {
-                            fail();
-                        }
+                        interpretResponse(response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -130,68 +136,73 @@ public class RegisterActivity extends AppCompatActivity {
 
     /**
      * @param response JSONObject returned from server register information
-     * @return boolean saying with registration was successful or failed
+     * Toast user explaining success/failure, redirects if GUI if success
      */
-    private boolean interpretResponse(JSONObject response) {
-        // TODO make sure server is returning expected JSON (ask Connor or Matt)
+    private void interpretResponse(JSONObject response) {
+        Log.d(TAG, "interpretResponse() from server");
+
         // attempt to breakdown JSON response
         try{
-            if( response.get("register").equals("success") ) {
-                return true;
-            } else if( response.get("register").equals("fail") ) {
-                return false;
+            // TODO make sure server is returning expected JSON (ask Connor or Matt)
+
+            // TODO check to make sure breaking down JSON correctly
+            String registration = response.get("register").toString();
+            if( registration.equals("success") ) {
+                Log.d(TAG, "registration: success");
+
+                // set user id global variables
+                // TODO check to make sure breaking down JSON correctly
+                Variables.user_id = (Integer)response.get("user_id");
+
+                // TODO add a toast or popup informing user of success
+
+                // change to plate confirmation activity
+                Intent intent = new Intent(this, ConfirmPlateActivity.class);
+                startActivity(intent);
+            } else if( registration.equals("fail") ) {
+                Log.d(TAG, "failed registration");
+                // clear username and password global variables
+                Variables.username = "";
+                Variables.password = "";
+
+                // TODO put Toast here informing user why failure occurred
+                // TODO add failure reason logic from JSON and put in Toast
+
+                // TODO tell user to reattempt to register, or restart activity
             }
         } catch (JSONException je) {
-            je.printStackTrace();
             Log.d(TAG, "JSON get error: " + je);
+            je.printStackTrace();
         }
 
-        // returns false if unable to read JSON
-        return false;
+        // TODO add error Toast
     }
 
     /**
-     * Response to user if server response to registration was not successful
-     */
-    private void fail() {
-        // TODO add toast or popup informing user of fail to register
-        // TODO tell user to reattempt to register, or restart activity
-    }
-
-    /**
-     * If server responses is successful registering new user name,
-     * sends user to register their plate.
-     */
-    private void success() {
-        // TODO add a toast or popup informing user of success
-
-        Intent intent = new Intent(this, ConfirmPlateActivity.class);
-        startActivity(intent);
-    }
-
-    /**
-     * @param username username a user is attempting to register
-     * @param password unencrypted password as user wants tied to name
-     *
      * @return string form of JSON object to be sent and register a new
-     *          user, on JSONException error, returns NULL; if NULL is
-     *          returned, it should be flagged in code calling method
+     *          user, on JSONException error, returns NULL
+     * TODO change error checking to something other than NULL
      */
-    private JSONObject formatJSONRegister(String username, String password) {
+    private JSONObject formatJSONRegister() {
+        Log.d(TAG, "formatJSONRegister data to send to server");
+
         JSONObject reg = new JSONObject();
         try {
             // server is set to recognize "messageType" in JSON object and
             // process data accordingly
             reg.put("messageType", "register_user");
-            reg.put("username", username);
-            reg.put("password", password);
-
-            // TODO may need to add a GCM API key to this
+            reg.put("username", Variables.username);
+            reg.put("password", Variables.password);
+            reg.put("gcm_user_id", Variables.gcm_user_id);
+            // TODO TEST that this is how server is expecting JSON
 
             return reg;
         } catch (JSONException je) {
-            Log.d(TAG, "JSON format error");
+            je.printStackTrace();
+            Log.d(TAG, "JSON format error" + je);
         }
+
+        // TODO may need to change this to return something besides null
         return null;
     }
 }
