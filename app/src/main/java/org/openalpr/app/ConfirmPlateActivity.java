@@ -42,6 +42,9 @@ import org.json.JSONObject;
  * Removed GCM upstream feature and replaced with HTTP Volley POST
  * request that handles responses from server as well. Put logs in
  * methods. Volley needs to be tested.
+ *
+ * date@(18.03.2016) editor@(cameronDz)
+ * Added check for empty JSON being sent to server.
  */
 
 public class ConfirmPlateActivity extends AppCompatActivity
@@ -88,7 +91,6 @@ public class ConfirmPlateActivity extends AppCompatActivity
 
         // data sent out to server using Volley HTTP POST. determines if plate
         // is available and sends user to activity according to response
-        // TODO TEST to make sure connection is being made
         sendDataToServer();
     }
 
@@ -127,35 +129,41 @@ public class ConfirmPlateActivity extends AppCompatActivity
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        // format data to be sent to server and address to send to
+        // format data to be sent to server
         JSONObject plate = formatJSONPlate();
-        //TODO make address a constant global variable
-        String address = "http://107.21.62.238/";
 
-        //TODO create error logic for checking JSON
+        // checks to make sure JSON is not empty
+        if( !(plate.toString().equals("{}") ) ) {
+            // new request to be sent out to server
+            Log.d(TAG, "create and send JSON POST request");
+            JsonObjectRequest jsonRequest = new JsonObjectRequest
+                    (Request.Method.POST, Constants.aws_address, plate,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    Log.d(TAG, "onResponse: " + response.toString());
+                                    // break down JSON response from server, send user to new
+                                    // activity if successful registration, or inform of fail
+                                    interpretResponse(response);
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, "onErrorResponse: " + error.getMessage());
 
-        //TODO create request and response
-        // new request to be sent out to server
-        Log.d(TAG, "create and send JSON POST request");
-        JsonObjectRequest jsonRequest = new JsonObjectRequest
-                (Request.Method.POST, address, plate,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                // break down JSON response from server, send user to new
-                                // activity if successful registration, or inform of fail
-                                interpretResponse(response);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // TODO create error listener
-                            }
-                        });
+                                    // TODO check for server timeout error
+                                    // TODO create server response error Toast
+                                }
+                            });
 
-        // new request added to queue
-        queue.add(jsonRequest);
+            // new request added to queue
+            queue.add(jsonRequest);
+        } else {
+            Log.d(TAG, "json variable empty error");
+
+            // TODO create empty JSON error Toast
+        }
     }
 
     /**
@@ -168,10 +176,8 @@ public class ConfirmPlateActivity extends AppCompatActivity
 
         //attempt to breakdown server JSON response
         try {
-            // TODO make sure server is returning expected JSON (ask Connor or Matt)
-
-            // TODO check to make sure breaking down JSON correctly
             String plateStatus = response.get("plate_register").toString();
+            // TODO make make sure server is returning expected JSON "plate_register"
             // logic checking plate was registered, redirecting user accordingly
             if( plateStatus.equals("success") ) {
                 Log.d(TAG, "interpretResponse: success");
@@ -195,14 +201,14 @@ public class ConfirmPlateActivity extends AppCompatActivity
         } catch (JSONException je) {
             je.printStackTrace();
             Log.e(TAG, "JSONException error: " + je);
-        }
 
-        // TODO figure out if user needs to be toasted about Exception error
+            // TODO add error Toast
+        }
     }
 
     /**
      * @return JSON object to be sent and register a plate to a user,
-     * on JSONException error, returns NULL; if NULL is returned
+     * on JSONException error, returns empty object
      */
     private JSONObject formatJSONPlate() {
         Log.d(TAG, "formatJSONRegister data to send to server");
@@ -221,9 +227,9 @@ public class ConfirmPlateActivity extends AppCompatActivity
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSON format error" + je);
+            plate = new JSONObject();
         }
-
-        //TODO send back something besides null
-        return null;
+        Log.d(TAG, "formatJSONPlate: " + plate.toString() );
+        return plate;
     }
 }

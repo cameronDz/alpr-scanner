@@ -36,8 +36,10 @@ import org.json.JSONObject;
  *
  * TODO: Add method to save which image was selected to a text file on users device
  *
- * date@(17.03.2016) @editor(cameronDz)
- *
+ * date@(18.03.2016) @editor(cameronDz)
+ * Added check for empty JSON being sent to server. Tested to make sure JSON
+ * Object was being interpreted and assembled correctly, made slight changes
+ * using toString() method for checking for empty Object.
  */
 
 public class MessageSendActivity extends AppCompatActivity {
@@ -84,39 +86,45 @@ public class MessageSendActivity extends AppCompatActivity {
     private void sendMessageToServer() {
         Log.d(TAG, "sendMessageToServer");
 
-
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
-        // Server address and JSONObject to be sent
-        // TODO TEST AWS address, make sure hard coding it is 'safe'
-        String address = "http://107.21.62.238/";
-        // TODO make address a constant global variable
-        JSONObject json = formatJSONMessage(plate, state, message, 0, 0);
-        // TODO get real gps coordinates
-        // TODO add a check to make sure json variable is not NULL
+        // JSONObject to be sent
+        JSONObject json = formatJSONMessage(plate, state, message, "2/20/2016 9:00:50", 0, 0);
+        // TODO come up with a non-static timestamp
+        // TODO come up with real gps coordinates
 
-        // new request to be sent out to server
-        Log.d(TAG, "create and send JSON POST request");
-        JsonObjectRequest jsonRequest = new JsonObjectRequest
-                (Request.Method.POST, address, json,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                // break down JSON response from server, send user to new
-                                // activity if successful registration, or inform of fail
-                                interpretResponse(response);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // TODO create error listener
-                            }
-                        });
+        // checks to make sure JSON object has data in it
+        if( !(json.toString().equals("{}")) ) {
+            // new request to be sent out to server
+            Log.d(TAG, "create and send JSON POST request");
+            JsonObjectRequest jsonRequest = new JsonObjectRequest
+                    (Request.Method.POST, Constants.aws_address, json,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    Log.d(TAG, "onResponse: " + response.toString());
+                                    // break down JSON response from server, send user to new
+                                    // activity if successful registration, or inform of fail
+                                    interpretResponse(response);
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, "Error: " + error.getMessage());
 
-        // new request added to queue
-        queue.add(jsonRequest);
+                                    // TODO check for server timeout error solutions
+                                    // TODO create server response error Toast
+                                }
+                            });
 
+            // new request added to queue
+            queue.add(jsonRequest);
+        } else {
+            Log.d(TAG, "json variable empty error");
+
+            // TODO create empty JSON error Toast
+        }
     }
 
     /**
@@ -128,33 +136,30 @@ public class MessageSendActivity extends AppCompatActivity {
 
         // attempt to breakdown JSON object
         try {
-            // TODO make sure server is returning expected JSON (ask Connor or Matt)
-
-            // TODO check to make sure breaking down JSON correctly
             // get message status from JSON object
-            String login = response.get("status").toString();
-            if( login.equals("success") ) {
-                Log.d(TAG, "login: success");
-
-                // TODO check to make sure breaking down JSON correctly
-                // set global username
-                Variables.username = response.get("username").toString();
+            String message = response.get("status").toString();
+            // TODO TEST make sure server is returning expected JSON "status"
+            if( message.equals("success") ) {
+                Log.d(TAG, "interpretResponse: success");
 
                 // TODO add a toast or popup informing user of success
 
                 // send user to home activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
                 startActivity(intent);
-            } else if( login.equals("fail") ) {
-                Log.d(TAG, "message: failed");
+            } else {
+                // assume "status : failed"
+                Log.d(TAG, "interpretResponse: failed");
 
                 // TODO put Toast here informing user of failure
+                // TODO get server JSON error response protocol
             }
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSONException: " + je);
-        }
 
+            // TODO add error Toast to user
+        }
     }
 
     /**
@@ -164,10 +169,11 @@ public class MessageSendActivity extends AppCompatActivity {
      * @param message message identifier
      * @param gpsLong longitudinal coordinates where plate picture was taken
      * @param gpsLat latitudinal coordinates where plate picture was taken
-     * @return a JSON object to be sent out to server
+     * @return a JSON object to be sent out to server, on error, sends an
+     *         empty JSON object
      */
     private JSONObject formatJSONMessage(String plate, String state, String message,
-                                         double gpsLong, double gpsLat) {
+                                         String time, double gpsLong, double gpsLat) {
         Log.d(TAG, "formatJSONMessage");
         JSONObject json = new JSONObject();
 
@@ -177,9 +183,7 @@ public class MessageSendActivity extends AppCompatActivity {
             json.put("plate_number", plate);
             json.put("plate_state", state);
             json.put("user_sender_id", Variables.user_id);
-            // TODO come up with a non-static timestamp
-            json.put("message_sent_timestamp","2/20/2016 9:00:50");
-            // TODO come up with real gps coordinates
+            json.put("message_sent_timestamp", time);
             json.put("gps_lat", gpsLat);
             json.put("gps_lon", gpsLong);
             json.put("message_sender_content", message);
@@ -187,9 +191,11 @@ public class MessageSendActivity extends AppCompatActivity {
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSONException: " + je);
-        }
 
-        // TODO find a way to not return null on error
+            // json is returned as an empty object if error occurs
+            json = new JSONObject();
+        }
+        Log.d(TAG, "formatJSONMessage result: " + json.toString() );
         return json;
     }
 }

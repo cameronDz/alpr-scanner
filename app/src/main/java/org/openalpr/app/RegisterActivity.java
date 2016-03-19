@@ -30,6 +30,9 @@ import org.json.JSONObject;
  * Added JSON formatting class for registering user, removed GCM upstream,
  * added framework for Volley HTTP POST. Put logs in methods. Volley needs
  * to be tested and tweaked.
+ *
+ * date@(18.03.2016) editor@(cameronDz)
+ * Added check for empty JSON being sent to server.
  */
 
 public class RegisterActivity extends AppCompatActivity {
@@ -91,7 +94,6 @@ public class RegisterActivity extends AppCompatActivity {
 
             // data sent out to server using Volley HTTP POST. determines if user
             // name is available and sends user to activity according to response
-            // TODO TEST to make sure connection is being made
             sendDataToServer();
         }
     }
@@ -104,34 +106,41 @@ public class RegisterActivity extends AppCompatActivity {
 
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
-        // Server address and JSONObject to be sent
-        // TODO TEST AWS address, make sure hard coding it is 'safe'
-        String address = "http://107.21.62.238/";
-        // TODO make address a constant global variable
+        // JSONObject to be sent to server
         JSONObject json = formatJSONRegister();
-        // TODO add a check to make sure json variable is not NULL
 
-        // new request to be sent out to server
-        Log.d(TAG, "create and send JSON POST request");
-        JsonObjectRequest jsonRequest = new JsonObjectRequest
-            (Request.Method.POST, address, json,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // break down JSON response from server, send user to new
-                        // activity if successful registration, or inform of fail
-                        interpretResponse(response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO create error listener
-                    }
-                });
+        // checks to make sure JSON has data in it
+        if ( !(json.toString().equals("{}")) ) {
+            // new request to be sent out to server
+            Log.d(TAG, "create and send JSON POST request");
+            JsonObjectRequest jsonRequest = new JsonObjectRequest
+                    (Request.Method.POST, Constants.aws_address, json,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    Log.d(TAG, "onResponse: " + response.toString());
+                                    // break down JSON response from server, send user to new
+                                    // activity if successful registration, or inform of fail
+                                    interpretResponse(response);
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, "onErrorResponse: " + error.getMessage());
 
-        // new request added to queue
-        queue.add(jsonRequest);
+                                    // TODO check for server timeout error
+                                    // TODO create server response error Toast
+                                }
+                            });
+
+            // new request added to queue
+            queue.add(jsonRequest);
+        } else {
+            Log.d(TAG, "json variable empty error");
+
+            // TODO create empty JSON error Toast
+        }
     }
 
     /**
@@ -143,16 +152,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         // attempt to breakdown JSON response
         try{
-            // TODO make sure server is returning expected JSON (ask Connor or Matt)
-
-            // TODO check to make sure breaking down JSON correctly
             String registration = response.get("register").toString();
+            // TODO make make sure server is returning expected JSON "register"
             if( registration.equals("success") ) {
-                Log.d(TAG, "registration: success");
+                Log.d(TAG, "interpretResponse: success");
 
-                // set user id global variables
-                // TODO check to make sure breaking down JSON correctly
+                // set user id global variables\
                 Variables.user_id = (Integer)response.get("user_id");
+                // TODO make make sure server is returning expected JSON "user_id"
 
                 // TODO add a toast or popup informing user of success
 
@@ -160,7 +167,7 @@ public class RegisterActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
                 startActivity(intent);
             } else if( registration.equals("fail") ) {
-                Log.d(TAG, "failed registration");
+                Log.d(TAG, "interpretResponse: failed");
                 // clear username and password global variables
                 Variables.username = "";
                 Variables.password = "";
@@ -180,8 +187,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /**
      * @return string form of JSON object to be sent and register a new
-     *          user, on JSONException error, returns NULL
-     * TODO change error checking to something other than NULL
+     *          user, on JSONException error, returns empty object
      */
     private JSONObject formatJSONRegister() {
         Log.d(TAG, "formatJSONRegister data to send to server");
@@ -196,13 +202,12 @@ public class RegisterActivity extends AppCompatActivity {
             reg.put("gcm_user_id", Variables.gcm_user_id);
             // TODO TEST that this is how server is expecting JSON
 
-            return reg;
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSON format error" + je);
+            reg = new JSONObject();
         }
-
-        // TODO may need to change this to return something besides null
-        return null;
+        Log.d(TAG,"formatJSONRegister: " + reg.toString() );
+        return reg;
     }
 }

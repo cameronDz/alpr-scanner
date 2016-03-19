@@ -44,6 +44,9 @@ import java.io.IOException;
  * time the app starts. Set Volley HTTP POST to attempt login with
  * response logic set to check if server JSON response, and send user
  * to the appropriate view/message.
+ *
+ * date@(18.03.2016) @editor(cameronDz)
+ * Added check for empty JSON being sent to server.
  */
 
 public class LoginActivity extends AppCompatActivity {
@@ -58,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
-    // method uses AsyncTask to get a GCM regisration token
+    // method uses AsyncTask to get a GCM registration token
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.v(TAG, "IOException: " + e);
                 }
 
-                // returns the token in string form, null if no token was recieved
+                // returns the token in string form, null if no token was received
                 return msg;
             }
 
@@ -96,6 +99,8 @@ public class LoginActivity extends AppCompatActivity {
                 Constants.REG_TOKEN = msg;
             }
         }.execute(null, null, null);
+
+        // TODO check if this is needed for Instance ID or for GCM upstream
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -123,7 +128,6 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Password: " + password);
 
         // username and password sent to server
-        // TODO TEST to make sure connection is being made
         attemptLogin(username, password);
     }
 
@@ -137,34 +141,41 @@ public class LoginActivity extends AppCompatActivity {
 
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
-        // Server address and JSONObject to be sent
-        // TODO TEST AWS address, make sure hard coding it is 'safe'
-        String address = "http://107.21.62.238/";
-        // TODO make address a constant global variable
+        // JSONObject to be sent to server
         JSONObject json = formatJSONLogin(username, password);
-        // TODO add a check to make sure json variable is not NULL
 
-        // new request to be sent out to server
-        Log.d(TAG, "create and send JSON POST request");
-        JsonObjectRequest jsonRequest = new JsonObjectRequest
-                (Request.Method.POST, address, json,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                // break down JSON response from server, send user to new
-                                // activity if successful registration, or inform of fail
-                                interpretResponse(response);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // TODO create error listener
-                            }
-                        });
+        // check to make sure json variable is not empty
+        if( !(json.toString().equals("{}")) ) {
+            // new request to be sent out to server
+            Log.d(TAG, "create and send JSON POST request");
+            JsonObjectRequest jsonRequest = new JsonObjectRequest
+                    (Request.Method.POST, Constants.aws_address, json,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    Log.d(TAG, "onResponse: " + response.toString());
+                                    // break down JSON response from server, send user to new
+                                    // activity if successful registration, or inform of fail
+                                    interpretResponse(response);
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, "onErrorResponse: " + error.getMessage() );
 
-        // new request added to queue
-        queue.add(jsonRequest);
+                                    // TODO check for server timeout error
+                                    // TODO create server response error Toast
+                                }
+                            });
+
+            // new request added to queue
+            queue.add(jsonRequest);
+        } else {
+            Log.d(TAG, "json variable empty error");
+
+            // TODO create empty JSON error Toast
+        }
     }
 
     /**
@@ -177,25 +188,24 @@ public class LoginActivity extends AppCompatActivity {
 
         // attempt to breakdown JSON response
         try{
-            // TODO make sure server is returning expected JSON (ask Connor or Matt)
-
-            // TODO check to make sure breaking down JSON correctly
             // get login status from JSON object
             String login = response.get("login").toString();
+            // TODO TEST make sure server is returning expected JSON "login"
             if( login.equals("success") ) {
-                Log.d(TAG, "login: success");
+                Log.d(TAG, "interpretResponse: success");
 
-                // TODO check to make sure breaking down JSON correctly
                 // set global username
                 Variables.username = response.get("username").toString();
+                // TODO TEST make sure server is returning expected JSON "username"
 
                 // TODO add a toast or popup informing user of success
 
                 // send user to home activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
                 startActivity(intent);
-            } else if( login.equals("fail") ) {
-                Log.d(TAG, "login: failed");
+            } else {
+                // assume "login : failed"
+                Log.d(TAG, "interpretResponse: failed");
 
                 // TODO put Toast here informing user of failure
 
@@ -204,9 +214,9 @@ public class LoginActivity extends AppCompatActivity {
         } catch (JSONException je) {
             Log.d(TAG, "JSON get error: " + je);
             je.printStackTrace();
-        }
 
-        // TODO add error Toast
+            // TODO add error Toast
+        }
     }
 
     /**
@@ -229,12 +239,18 @@ public class LoginActivity extends AppCompatActivity {
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSONException: " + je);
-        }
 
-        // TODO find a way to not return null on error
+            // json is returned as an empty object if error occurs
+            json = new JSONObject();
+        }
+        Log.d(TAG, "formatJSONLogin result: " + json.toString() );
         return json;
     }
 
+    /**
+     * Register button is pressed, sends user to register activity
+     * @param view current view
+     */
     public void redirectToRegister(View view) {
         Log.d(TAG, "Register Button Pressed");
         Intent intent = new Intent(context, RegisterActivity.class);
@@ -266,6 +282,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
+        // TODO see if this is needed for GCM Instance ID or upstream messaging
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client.connect();
@@ -286,6 +303,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
 
+        // TODO see if this is needed for GCM Instance ID or upstream messaging
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
