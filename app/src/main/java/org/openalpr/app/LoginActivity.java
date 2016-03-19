@@ -13,6 +13,7 @@ import android.widget.EditText;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -47,6 +48,9 @@ import java.io.IOException;
  *
  * date@(18.03.2016) @editor(cameronDz)
  * Added check for empty JSON being sent to server.
+ *
+ * date@(19.03.2016) editor@(cameronDz)
+ * Added server timeout error listener to the POST response
  */
 
 public class LoginActivity extends AppCompatActivity {
@@ -162,10 +166,20 @@ public class LoginActivity extends AppCompatActivity {
                             new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, "onErrorResponse: " + error.getMessage() );
+                                    Log.d(TAG, "Error: " + error.getMessage());
 
-                                    // TODO check for server timeout error
-                                    // TODO create server response error Toast
+                                    // check for server timeout error
+                                    if( error.networkResponse == null ) {
+                                        if( error.getClass().equals(TimeoutError.class) ) {
+                                            Log.d(TAG, "Error: server timeout");
+
+                                            // TODO create server response error Toast
+                                        }
+                                    } else {
+                                        Log.d(TAG, "Error: server problem");
+
+                                        // TODO error Toast
+                                    }
                                 }
                             });
 
