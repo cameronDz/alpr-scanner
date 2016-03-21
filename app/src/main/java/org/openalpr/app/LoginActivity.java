@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        context = getApplicationContext();
+        context = this;
 
         // GCM InstanceID is refreshed and saved globally in app
         iid = InstanceID.getInstance(context);
