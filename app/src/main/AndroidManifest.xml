@@ -60,6 +60,7 @@
         <activity android:name=".MessageSendActivity" />
         <activity android:name=".VerifyPlateActivity"/>
             <!--android:screenOrientation="portrait"/>-->
+
         <activity android:name=".ConfirmPlateActivity" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".InboxActivity" />
