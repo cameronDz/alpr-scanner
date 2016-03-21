@@ -332,7 +332,7 @@ public class LoginActivity extends AppCompatActivity {
     private void userPopUp(String message, String confirm) {
         Log.d(TAG, "errorPopUp");
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message).setCancelable(false).setPositiveButton(confirm,
                 new DialogInterface.OnClickListener() {
                     @Override
