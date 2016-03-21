@@ -54,7 +54,7 @@ import java.io.IOException;
  * date@(19.03.2016) editor@(cameronDz)
  * Added server timeout error listener to the POST response
  *
- * date@(201.03.2016) editor@(cameronDz)
+ * date@(20.03.2016) editor@(cameronDz)
  * Added AlertDialog popups to all errors and server processing where the
  * process might be interrupted, an error may occur, and when user is
  * successfully logged into server.
