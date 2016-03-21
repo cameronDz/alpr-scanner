@@ -1,6 +1,8 @@
 package org.openalpr.app;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -51,6 +53,11 @@ import java.io.IOException;
  *
  * date@(19.03.2016) editor@(cameronDz)
  * Added server timeout error listener to the POST response
+ *
+ * date@(201.03.2016) editor@(cameronDz)
+ * Added AlertDialog popups to all errors and server processing where the
+ * process might be interrupted, an error may occur, and when user is
+ * successfully logged into server.
  */
 
 public class LoginActivity extends AppCompatActivity {
@@ -173,12 +180,24 @@ public class LoginActivity extends AppCompatActivity {
                                         if( error.getClass().equals(TimeoutError.class) ) {
                                             Log.d(TAG, "Error: server timeout");
 
-                                            // TODO create server response error Toast
+                                            // display pop up to user informing of server timeout
+                                            String message = "There may be a problem with the " +
+                                                    "server. Please try logging in again. Press " +
+                                                    "Re-Try to reattempt to log in.";
+                                            String confirm = "Re-Try.";
+                                            userPopUp(message, confirm);
                                         }
                                     } else {
                                         Log.d(TAG, "Error: server problem");
 
-                                        // TODO error Toast
+                                        // display pop up to user informing of server issue
+                                        // usual error is no internet access
+                                        String message = "There may be a problem with your " +
+                                                "internet access. Please check your connection " +
+                                                "to the internet and press Re-Try to " +
+                                                "reattempt to log in.";
+                                        String confirm = "Re-Try.";
+                                        userPopUp(message, confirm);
                                     }
                                 }
                             });
@@ -188,7 +207,11 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "json variable empty error");
 
-            // TODO create empty JSON error Toast
+            // display pop up informing user of data problem
+            String message = "There may be a problem with processing you data. " +
+                    "Please press Re-Try to reattempt to log in.";
+            String confirm = "Re-Try.";
+            userPopUp(message, confirm);
         }
     }
 
@@ -212,7 +235,10 @@ public class LoginActivity extends AppCompatActivity {
                 Variables.username = response.get("username").toString();
                 // TODO TEST make sure server is returning expected JSON "username"
 
-                // TODO add a toast or popup informing user of success
+                // display pop up to user informing of successful log in
+                String message = "Log in successful. Press Continue to access account. ";
+                String confirm = "Continue.";
+                userPopUp(message, confirm);
 
                 // send user to home activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
@@ -221,15 +247,21 @@ public class LoginActivity extends AppCompatActivity {
                 // assume "login : failed"
                 Log.d(TAG, "interpretResponse: failed");
 
-                // TODO put Toast here informing user of failure
-
-                // TODO tell user to reattempt login, or restart activity
+                // display pop up to user wrong log in info
+                String message = "There was a problem with your username or password. " +
+                        "Press Re-Try to reattempt log in.";
+                String confirm = "Re-Try.";
+                userPopUp(message, confirm);
             }
         } catch (JSONException je) {
             Log.d(TAG, "JSON get error: " + je);
             je.printStackTrace();
 
-            // TODO add error Toast
+            // display pop up to user informing of error
+            String message = "There was an error processing the server response. " +
+                    "Sorry for the inconvenience. Press Re-Try to attempt to log in again.";
+            String confirm = "Re-Try.";
+            userPopUp(message, confirm);
         }
     }
 
@@ -290,6 +322,27 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Image file path: " + platePath);
 
         startActivity(scanIntent);
+    }
+
+    /**
+     * Create pop up for user to inform about server response or data processing
+     * @param message message displayed to user
+     * @param confirm acceptance button text
+     */
+    private void userPopUp(String message, String confirm) {
+        Log.d(TAG, "errorPopUp");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message).setCancelable(false).setPositiveButton(confirm,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "errorPopUp : onClick");
+                        // do nothing
+                    }
+                });
+        // display message
+        builder.create().show();
     }
 
     @Override

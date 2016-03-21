@@ -1,6 +1,8 @@
 package org.openalpr.app;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,17 +45,26 @@ import org.json.JSONObject;
  * using toString() method for checking for empty Object.
  *
  * date@(19.03.2016) editor@(cameronDz)
- * Added server timeout error listener to the POST response
+ * Added server timeout error listener to the POST response. Rearranged how
+ * message data is gathered for sending a message and creating JSON.
+ *
+ * date@(20.03.2016) editor@(cameronDz)
+ * Added AlertDialog popups to all errors and server processing where the
+ * process might be interrupted, an error may occur, and when user is
+ * successfully sends a message.
  */
 
 public class MessageSendActivity extends AppCompatActivity {
 
     private String TAG = "MessageSendActivity";
     private Context context;
+    // message data
     private String state;
     private String plate;
     private String message;
-    // TODO get gps coordinates
+    private double gpsLong;
+    private double gpsLat;
+    private String time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +77,13 @@ public class MessageSendActivity extends AppCompatActivity {
         Intent intent = getIntent();
         state = intent.getStringExtra("state");
         plate = intent.getStringExtra("plate");
+        // Get gps coordinates of incident
+        gpsLat = 0;
+        gpsLong = 0;
+        // TODO get real gps coordinates
+        // get timestamp of incident
+        time = "2/20/2016 9:00:50";
+        // TODO get real timestamp
 
         Log.d(TAG, "STATE: " + state);
         Log.d(TAG, "PLATE: " + plate);
@@ -93,9 +111,7 @@ public class MessageSendActivity extends AppCompatActivity {
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
         // JSONObject to be sent
-        JSONObject json = formatJSONMessage(plate, state, message, "2/20/2016 9:00:50", 0, 0);
-        // TODO come up with a non-static timestamp
-        // TODO come up with real gps coordinates
+        JSONObject json = formatJSONMessage(plate, state, message, time, gpsLong, gpsLat);
 
         // checks to make sure JSON object has data in it
         if( !(json.toString().equals("{}")) ) {
@@ -122,12 +138,24 @@ public class MessageSendActivity extends AppCompatActivity {
                                         if( error.getClass().equals(TimeoutError.class) ) {
                                             Log.d(TAG, "Error: server timeout");
 
-                                            // TODO create server response error Toast
+                                            // display pop up to user informing of server timeout
+                                            String message = "There may be a problem with the " +
+                                                    "server. Please try logging in again. Press " +
+                                                    "Re-Try to reattempt to send your message.";
+                                            String confirm = "Re-Try.";
+                                            userPopUp(message, confirm);
                                         }
                                     } else {
                                         Log.d(TAG, "Error: server problem");
 
-                                        // TODO error Toast
+                                        // display pop up to user informing of server issue
+                                        // usual error is no internet access
+                                        String message = "There may be a problem with your " +
+                                                "internet access. Please check your connection " +
+                                                "to the internet and press Re-Try to " +
+                                                "reattempt to send your message.";
+                                        String confirm = "Re-Try.";
+                                        userPopUp(message, confirm);
                                     }
                                 }
                             });
@@ -137,7 +165,11 @@ public class MessageSendActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "json variable empty error");
 
-            // TODO create empty JSON error Toast
+            // display pop up informing user of data problem
+            String message = "There may be a problem with processing you data. " +
+                    "Please press Re-Try to reattempt to send your message.";
+            String confirm = "Re-Try.";
+            userPopUp(message, confirm);
         }
     }
 
@@ -151,12 +183,20 @@ public class MessageSendActivity extends AppCompatActivity {
         // attempt to breakdown JSON object
         try {
             // get message status from JSON object
-            String message = response.get("status").toString();
+            String messResp = response.get("status").toString();
             // TODO TEST make sure server is returning expected JSON "status"
-            if( message.equals("success") ) {
+            if( messResp.equals("success") ) {
                 Log.d(TAG, "interpretResponse: success");
 
-                // TODO add a toast or popup informing user of success
+                // display pop up informing user of successful plate registration
+                // TODO add message sent and plate sent to message details
+                String message = "The message: " + "INSERT_MESSAGE" + " has been " +
+                        "sent to plate: "+ "INSERT_PLATE" + " successfully. " +
+                        "Press Continue to access your home screen.";
+                String confirm = "Continue.";
+                userPopUp(message, confirm);
+
+                // TODO erase plate sent to message details from device
 
                 // send user to home activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
@@ -165,14 +205,24 @@ public class MessageSendActivity extends AppCompatActivity {
                 // assume "status : failed"
                 Log.d(TAG, "interpretResponse: failed");
 
-                // TODO put Toast here informing user of failure
-                // TODO get server JSON error response protocol
+                // get a possible error from JSON
+                String error = response.get("error").toString();
+                // display pop up to user bad plate registration data
+                String message = "There was a problem with your message. " +
+                        "The error was: " + error + ". " +
+                        "Press Re-Try to reattempt to send your message.";
+                String confirm = "Re-Try.";
+                userPopUp(message, confirm);
             }
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSONException: " + je);
 
-            // TODO add error Toast to user
+            // display pop up to user informing of error
+            String message = "There was an error processing the server response. " +
+                    "Sorry for the inconvenience. Press Re-Try to reattempt to send message.";
+            String confirm = "Re-Try.";
+            userPopUp(message, confirm);
         }
     }
 
@@ -211,5 +261,26 @@ public class MessageSendActivity extends AppCompatActivity {
         }
         Log.d(TAG, "formatJSONMessage result: " + json.toString() );
         return json;
+    }
+
+    /**
+     * Create pop up for user to inform about server response or data processing
+     * @param message message displayed to user
+     * @param confirm acceptance button text
+     */
+    private void userPopUp(String message, String confirm) {
+        Log.d(TAG, "errorPopUp");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message).setCancelable(false).setPositiveButton(confirm,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "errorPopUp : onClick");
+                        // do nothing
+                    }
+                });
+        // display message
+        builder.create().show();
     }
 }

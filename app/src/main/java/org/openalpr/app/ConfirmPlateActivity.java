@@ -1,6 +1,8 @@
 package org.openalpr.app;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -49,6 +51,11 @@ import org.json.JSONObject;
  *
  * date@(19.03.2016) editor@(cameronDz)
  * Added server timeout error listener to the POST response
+ *
+ * date@(20.03.2016) editor@(cameronDz)
+ * Added AlertDialog popups to all errors and server processing where the
+ * process might be interrupted, an error may occur, and when user is
+ * successfully registers a plate to a username.
  */
 
 public class ConfirmPlateActivity extends AppCompatActivity
@@ -161,12 +168,24 @@ public class ConfirmPlateActivity extends AppCompatActivity
                                         if( error.getClass().equals(TimeoutError.class) ) {
                                             Log.d(TAG, "Error: server timeout");
 
-                                            // TODO create server response error Toast
+                                            // display pop up to user informing of server timeout
+                                            String message = "There may be a problem with the " +
+                                                    "server. Please try registering again. Press " +
+                                                    "Re-Try to reattempt to register your plate.";
+                                            String confirm = "Re-Try.";
+                                            userPopUp(message, confirm);
                                         }
                                     } else {
                                         Log.d(TAG, "Error: server problem");
 
-                                        // TODO error Toast
+                                        // display pop up to user informing of server issue
+                                        // usual error is no internet access
+                                        String message = "There may be a problem with your " +
+                                                "internet access. Please check your connection " +
+                                                "to the internet and press Re-Try to " +
+                                                "reattempt to register your plate.";
+                                        String confirm = "Re-Try.";
+                                        userPopUp(message, confirm);
                                     }
                                 }
                             });
@@ -176,7 +195,11 @@ public class ConfirmPlateActivity extends AppCompatActivity
         } else {
             Log.d(TAG, "json variable empty error");
 
-            // TODO create empty JSON error Toast
+            // display pop up informing user of data problem
+            String message = "There may be a problem with processing you data. " +
+                    "Please press Re-Try to reattempt to register your plate.";
+            String confirm = "Re-Try.";
+            userPopUp(message, confirm);
         }
     }
 
@@ -196,27 +219,45 @@ public class ConfirmPlateActivity extends AppCompatActivity
             if( plateStatus.equals("success") ) {
                 Log.d(TAG, "interpretResponse: success");
 
-                // TODO Toast user about success
+                // display pop up informing user of successful plate registration
+                // TODO make sure username and plate are displayed correctly
+                String message = "The plate: " + Variables.user_plate + " has been " +
+                        "register to user: "+ Variables.username + " successfully. " +
+                        "Press Continue to access your home screen.";
+                String confirm = "Continue.";
+                userPopUp(message, confirm);
 
                 // send user to home activity
                 Intent intent = new Intent(this, HomeActivity.class);
                 startActivity(intent);
-            } else if (plateStatus.equals("failure") ) {
+            } else {
+                // assume plateStatus.equals("failure")
                 Log.d(TAG, "interpretResponse: failure");
 
                 // clear plate global variables
                 Variables.user_plate = "";
                 Variables.user_state = "";
 
-                // TODO add Toast explaining to user of failure
-                // TODO reset activity or tell user to re-enter plate
+                // get a possible error from JSON
+                String error = response.get("error").toString();
+                // display pop up to user bad plate registration data
+                String message = "There was a problem with your plate or state. " +
+                        "The error was: " + error + ". " +
+                        "Press Re-Try to reattempt plate registration.";
+                String confirm = "Re-Try.";
+                userPopUp(message, confirm);
 
             }
         } catch (JSONException je) {
             je.printStackTrace();
             Log.e(TAG, "JSONException error: " + je);
 
-            // TODO add error Toast
+            // display pop up to user informing of error
+            String message = "There was an error processing the server response. " +
+                    "Sorry for the inconvenience. Press Re-Try to attempt to register " +
+                    "your plate again.";
+            String confirm = "Re-Try.";
+            userPopUp(message, confirm);
         }
     }
 
@@ -245,5 +286,26 @@ public class ConfirmPlateActivity extends AppCompatActivity
         }
         Log.d(TAG, "formatJSONPlate: " + plate.toString() );
         return plate;
+    }
+
+    /**
+     * Create pop up for user to inform about server response or data processing
+     * @param message message displayed to user
+     * @param confirm acceptance button text
+     */
+    private void userPopUp(String message, String confirm) {
+        Log.d(TAG, "errorPopUp");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message).setCancelable(false).setPositiveButton(confirm,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "errorPopUp : onClick");
+                        // do nothing
+                    }
+                });
+        // display message
+        builder.create().show();
     }
 }
