@@ -213,30 +213,25 @@ public class ConfirmPlateActivity extends AppCompatActivity
 
         //attempt to breakdown server JSON response
         try {
-            String plateStatus = response.get("plate_register").toString();
-            // TODO make make sure server is returning expected JSON "plate_register"
             // logic checking plate was registered, redirecting user accordingly
-            if( plateStatus.equals("success") ) {
-                Log.d(TAG, "interpretResponse: success");
+            if( response.has("output") ) {
+                Log.d(TAG, "interpretResponse() = output");
 
+                String output = response.get("output").toString();
                 // display pop up informing user of successful plate registration
-                // TODO make sure username and plate are displayed correctly
                 String message = "The plate: " + Variables.user_plate + " has been " +
                         "register to user: "+ Variables.username + " successfully. " +
-                        "Press Continue to access your home screen.";
+                        "Press Continue to access your home screen. " + output;
                 String confirm = "Continue.";
                 userPopUp(message, confirm);
 
                 // send user to home activity
                 Intent intent = new Intent(this, HomeActivity.class);
                 startActivity(intent);
-            } else {
-                // assume plateStatus.equals("failure")
-                Log.d(TAG, "interpretResponse: failure");
 
-                // clear plate global variables
-                Variables.user_plate = "";
-                Variables.user_state = "";
+            // check for error message
+            } else if ( response.has("error") ) {
+                Log.d(TAG, "interpretResponse() = error");
 
                 // get a possible error from JSON
                 String error = response.get("error").toString();
@@ -247,10 +242,13 @@ public class ConfirmPlateActivity extends AppCompatActivity
                 String confirm = "Re-Try.";
                 userPopUp(message, confirm);
 
+            } else {
+                Log.d(TAG, "interpretResponse() = unknown response: " + response.toString());
+
             }
         } catch (JSONException je) {
             je.printStackTrace();
-            Log.e(TAG, "JSONException error: " + je);
+            Log.e(TAG, "JSONException error: " + je.toString() );
 
             // display pop up to user informing of error
             String message = "There was an error processing the server response. " +
@@ -259,6 +257,10 @@ public class ConfirmPlateActivity extends AppCompatActivity
             String confirm = "Re-Try.";
             userPopUp(message, confirm);
         }
+
+        // clear plate global variables
+        Variables.user_plate = "";
+        Variables.user_state = "";
     }
 
     /**
@@ -272,11 +274,10 @@ public class ConfirmPlateActivity extends AppCompatActivity
         try {
             // server is set to recognize "messageType" in JSON object and
             // process data accordingly
-            plate.put("messageType", "plate");
+            plate.put("message_type", "plate");
             plate.put("user_id", Variables.user_id);
             plate.put("plate_number", Variables.user_plate);
             plate.put("plate_state", Variables.user_state);
-            //TODO TEST that this is how server is expecting JSON
 
             return plate;
         } catch (JSONException je) {

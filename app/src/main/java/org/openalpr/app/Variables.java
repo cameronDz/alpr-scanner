@@ -9,6 +9,8 @@ package org.openalpr.app;
  * date@(17.03.2016) @editor(cameronDz)
  * TODO find more efficient way to persist variables in this class, or
  * TODO combine with Constants class
+ * TODO clean up variables
+ * TODO add file to dump message data into
  */
 public class Variables {
     //registering user data
@@ -22,8 +24,8 @@ public class Variables {
     // sending message data
     protected static String plate_to = "";
     protected static String state_to = "";
-    protected static String gps_lat = "";
-    protected static String gps_long = "";
+    //protected static double gps_lat = 0;
+    //protected static double gps_long = 0;
 
     private Variables() {
         // empty

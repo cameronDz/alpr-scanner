@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,16 +17,11 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
 
 /**
  * Created by Anthony Brignano on 2/17/16.
@@ -70,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client;
+ //   private GoogleApiClient client;
 
     // method uses AsyncTask to get a GCM registration token
     @Override
@@ -85,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         Constants.INST_ID = iid.getId();
 
         // GCM API token is refreshed and saved globally
-        new AsyncTask<Void, Void, String>() {
+      /*  new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
                 Log.d(TAG, "doInBackground: GCM API");
@@ -109,12 +102,12 @@ public class LoginActivity extends AppCompatActivity {
                 // save token in global variables
                 Constants.REG_TOKEN = msg;
             }
-        }.execute(null, null, null);
+        }.execute(null, null, null);*/
 
         // TODO check if this is needed for Instance ID or for GCM upstream
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+       // client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     /**
@@ -135,6 +128,8 @@ public class LoginActivity extends AppCompatActivity {
         EditText p = (EditText) findViewById(R.id.password);
         String username = u.getText().toString();
         String password = p.getText().toString();
+        // set global username
+        Variables.username = username;
         Log.d(TAG, "Username: " + username);
         Log.d(TAG, "Password: " + password);
 
@@ -226,30 +221,36 @@ public class LoginActivity extends AppCompatActivity {
         // attempt to breakdown JSON response
         try{
             // get login status from JSON object
-            String login = response.get("login").toString();
-            // TODO TEST make sure server is returning expected JSON "login"
-            if( login.equals("success") ) {
-                Log.d(TAG, "interpretResponse: success");
+            if( response.has("output") ) {
+                Log.d(TAG, "interpretResponse() = output");
 
-                // set global username
-                Variables.username = response.get("username").toString();
-                // TODO TEST make sure server is returning expected JSON "username"
-
+                String output = response.get("output").toString();
                 // display pop up to user informing of successful log in
-                String message = "Log in successful. Press Continue to access account. ";
+                String message = "Log in successful. " + output +
+                        ". Press Continue to access account.";
                 String confirm = "Continue.";
                 userPopUp(message, confirm);
 
                 // send user to home activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
                 startActivity(intent);
-            } else {
-                // assume "login : failed"
-                Log.d(TAG, "interpretResponse: failed");
+            // server returned an error
+            } else if( response.has("error") ) {
+                Log.d(TAG, "interpretResponse() = error");
 
+                String error = response.get("error").toString();
                 // display pop up to user wrong log in info
                 String message = "There was a problem with your username or password. " +
-                        "Press Re-Try to reattempt log in.";
+                        error + "Press Re-Try to reattempt log in.";
+                String confirm = "Re-Try.";
+                userPopUp(message, confirm);
+            // server returns an unexpected response
+            } else {
+                Log.d(TAG, "interpretResponse() = unknown response: " + response.toString());
+
+                // display pop up to user bad plate registration data
+                String message = "There was a server problem. " +
+                        "Press Re-Try to reattempt to log in.";
                 String confirm = "Re-Try.";
                 userPopUp(message, confirm);
             }
@@ -263,6 +264,8 @@ public class LoginActivity extends AppCompatActivity {
             String confirm = "Re-Try.";
             userPopUp(message, confirm);
         }
+        // clear global variable
+        Variables.username = "";
     }
 
     /**
@@ -277,11 +280,10 @@ public class LoginActivity extends AppCompatActivity {
 
         // attempt to put user login info, and gcm token into JSON
         try {
-            json.put("messageType","login");
+            json.put("message_type","login");
             json.put("username", username);
             json.put("password", password);
             json.put("gcm_user_id", Variables.gcm_user_id);
-            // TODO TEST that this is how server is expecting JSON
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSONException: " + je);
@@ -295,7 +297,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Register button is pressed, sends user to register activity
-     * @param view current view
+     * @param view button view
      */
     public void redirectToRegister(View view) {
         Log.d(TAG, "Register Button Pressed");
@@ -345,7 +347,7 @@ public class LoginActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    @Override
+  /*  @Override
     public void onStart() {
         super.onStart();
 
@@ -385,5 +387,5 @@ public class LoginActivity extends AppCompatActivity {
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
-    }
+    }*/
 }

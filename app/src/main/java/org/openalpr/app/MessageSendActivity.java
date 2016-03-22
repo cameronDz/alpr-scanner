@@ -61,6 +61,7 @@ public class MessageSendActivity extends AppCompatActivity {
     // message data
     private String state;
     private String plate;
+    // TODO change message to an int value
     private String message;
     private double gpsLong;
     private double gpsLat;
@@ -92,6 +93,7 @@ public class MessageSendActivity extends AppCompatActivity {
     public void sendMessage(View view) {
         Log.d(TAG, "sendMessage Button Pressed");
         ImageButton message_button = (ImageButton) view;
+        // TODO change this to an int
         message = message_button.getContentDescription().toString();
 
         // displays message to user
@@ -111,7 +113,9 @@ public class MessageSendActivity extends AppCompatActivity {
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
         // JSONObject to be sent
-        JSONObject json = formatJSONMessage(plate, state, message, time, gpsLong, gpsLat);
+        // TODO remove this once message is converted to int
+        int messInt = Integer.parseInt(message);
+        JSONObject json = formatJSONMessage(plate, state, messInt, time, gpsLong, gpsLat);
 
         // checks to make sure JSON object has data in it
         if( !(json.toString().equals("{}")) ) {
@@ -182,35 +186,47 @@ public class MessageSendActivity extends AppCompatActivity {
 
         // attempt to breakdown JSON object
         try {
-            // get message status from JSON object
-            String messResp = response.get("status").toString();
-            // TODO TEST make sure server is returning expected JSON "status"
-            if( messResp.equals("success") ) {
-                Log.d(TAG, "interpretResponse: success");
+            // server returns a successful output
+            if( response.has("output") ) {
+                Log.d(TAG, "interpretResponse() = output");
 
+                String output = response.get("output").toString();
                 // display pop up informing user of successful plate registration
-                // TODO add message sent and plate sent to message details
-                String message = "The message: " + "INSERT_MESSAGE" + " has been " +
-                        "sent to plate: "+ "INSERT_PLATE" + " successfully. " +
-                        "Press Continue to access your home screen.";
+                String message = "The message: " + this.message + " has been " +
+                        "sent to plate: "+ this.plate + this.state + " successfully. " +
+                        "Press Continue to access your home screen." + output;
                 String confirm = "Continue.";
                 userPopUp(message, confirm);
 
-                // TODO erase plate sent to message details from device
+                // clear all message details from device
+                this.plate = "";
+                this.state = "";
+                this.gpsLong = 0;
+                this.gpsLat = 0;
+                this.time = "";
 
                 // send user to home activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
                 startActivity(intent);
-            } else {
-                // assume "status : failed"
-                Log.d(TAG, "interpretResponse: failed");
 
-                // get a possible error from JSON
+            // the server returned an error response
+            } else if ( response.has("error") ) {
+                Log.d(TAG, "interpretResponse() = error");
+
+                // get error from JSON
                 String error = response.get("error").toString();
                 // display pop up to user bad plate registration data
                 String message = "There was a problem with your message. " +
                         "The error was: " + error + ". " +
                         "Press Re-Try to reattempt to send your message.";
+                String confirm = "Re-Try.";
+                userPopUp(message, confirm);
+            } else {
+                Log.d(TAG, "interpretResponse() = unknown response: " + response.toString());
+
+                // display pop up to user bad plate registration data
+                String message = "There was a server problem. " +
+                        "Press Re-Try to reattempt send your message.";
                 String confirm = "Re-Try.";
                 userPopUp(message, confirm);
             }
@@ -236,14 +252,14 @@ public class MessageSendActivity extends AppCompatActivity {
      * @return a JSON object to be sent out to server, on error, sends an
      *         empty JSON object
      */
-    private JSONObject formatJSONMessage(String plate, String state, String message,
+    private JSONObject formatJSONMessage(String plate, String state, int message,
                                          String time, double gpsLong, double gpsLat) {
         Log.d(TAG, "formatJSONMessage");
         JSONObject json = new JSONObject();
 
         // attempt to put message into JSON object
         try {
-            json.put("messageType","message");
+            json.put("message_type","message");
             json.put("plate_number", plate);
             json.put("plate_state", state);
             json.put("user_sender_id", Variables.user_id);
@@ -251,7 +267,6 @@ public class MessageSendActivity extends AppCompatActivity {
             json.put("gps_lat", gpsLat);
             json.put("gps_lon", gpsLong);
             json.put("message_sender_content", message);
-            // TODO TEST that this is how server is expecting JSON
         } catch (JSONException je) {
             je.printStackTrace();
             Log.d(TAG, "JSONException: " + je);

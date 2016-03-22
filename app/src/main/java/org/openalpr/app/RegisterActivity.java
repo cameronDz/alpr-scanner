@@ -44,6 +44,10 @@ import org.json.JSONObject;
  * Added AlertDialog popups to all errors and server processing where the
  * process might be interrupted, an error may occur, and when username is
  * successfully registered.
+ *
+ * date@(21.03.2016) editor@(cameronDz)
+ * Checked and changed the expected server  POST key values, and expected
+ * server response key values.
  */
 
 public class RegisterActivity extends AppCompatActivity {
@@ -103,16 +107,19 @@ public class RegisterActivity extends AppCompatActivity {
             Variables.username = username;
             Variables.password = password;
 
+            // make button unclickable to avoid sending multiple registrations
+            view.setClickable(false);
             // data sent out to server using Volley HTTP POST. determines if user
             // name is available and sends user to activity according to response
-            sendDataToServer();
+            sendDataToServer(view);
         }
     }
 
     /**
      * Sends registration data to server
+     * @param view used to turn button back on after an error occurs
      */
-    private void sendDataToServer() {
+    private void sendDataToServer(final View view) {
         Log.d(TAG, "sendDataToServer");
 
         // requests queue to be sent to server
@@ -132,7 +139,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     Log.d(TAG, "onResponse: " + response.toString());
                                     // break down JSON response from server, send user to new
                                     // activity if successful registration, or inform of fail
-                                    interpretResponse(response);
+                                    interpretResponse(response, view);
                                 }
                             },
                             new Response.ErrorListener() {
@@ -164,6 +171,8 @@ public class RegisterActivity extends AppCompatActivity {
                                         String confirm = "Re-Try.";
                                         userPopUp(message, confirm);
                                     }
+                                    // turn register button back on after error
+                                    view.setClickable(true);
                                 }
                             });
 
@@ -178,29 +187,27 @@ public class RegisterActivity extends AppCompatActivity {
             String confirm = "Re-Try.";
             userPopUp(message, confirm);
         }
+        Log.d(TAG, "JSON request queued");
     }
 
     /**
      * @param response JSONObject returned from server register information
+     * @param view used to turn register button back on after error occurs
      * Toast user explaining success/failure, redirects if GUI if success
      */
-    private void interpretResponse(JSONObject response) {
+    private void interpretResponse(JSONObject response, View view) {
         Log.d(TAG, "interpretResponse() from server");
 
-        // attempt to breakdown JSON response
         try{
-            String registration = response.get("register").toString();
-            // TODO make make sure server is returning expected JSON "register"
-            if( registration.equals("success") ) {
-                Log.d(TAG, "interpretResponse: success");
+            // check for output key, meaning successful registration
+            if( response.has("output") ) {
+                Log.d(TAG, "interpretResponse() = output");
 
                 // set user id global variables\
                 Variables.user_id = (Integer)response.get("user_id");
-                // TODO make make sure server is returning expected JSON "user_id"
 
                 // display pop up informing user of successful plate registration
-                // TODO add username to message
-                String message = "You have registered the name: " + "INSERT_USERNAME" +
+                String message = "You have registered the name: " + Variables.username +
                         ". Press Continue to register a plate.";
                 String confirm = "Continue.";
                 userPopUp(message, confirm);
@@ -208,18 +215,26 @@ public class RegisterActivity extends AppCompatActivity {
                 // change to plate confirmation activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
                 startActivity(intent);
-            } else {
-                // assume registration.equals("fail")
-                Log.d(TAG, "interpretResponse: failed");
-                // clear username and password global variables
-                Variables.username = "";
-                Variables.password = "";
 
-                // get a possible error from JSON
+            // check for error key, meaning server is returning an error
+            } else if ( response.has("error") ) {
+                Log.d(TAG, "interpretResponse() = error");
+
+                // get error from JSON
                 String error = response.get("error").toString();
                 // display pop up to user bad plate registration data
                 String message = "There was a problem with your username. " +
                         "The error was: " + error + ". " +
+                        "Press Re-Try to reattempt user registration.";
+                String confirm = "Re-Try.";
+                userPopUp(message, confirm);
+
+            // server returned some unknown response
+            } else {
+                Log.d(TAG, "interpretResponse() = unknown response: " + response.toString());
+
+                // display pop up to user bad plate registration data
+                String message = "There was a server problem. " +
                         "Press Re-Try to reattempt user registration.";
                 String confirm = "Re-Try.";
                 userPopUp(message, confirm);
@@ -234,6 +249,12 @@ public class RegisterActivity extends AppCompatActivity {
             String confirm = "Re-Try.";
             userPopUp(message, confirm);
         }
+
+        // clear username and password global variables
+        Variables.username = "";
+        Variables.password = "";
+        // turn register button back on after an error
+        view.setClickable(true);
     }
 
     /**
@@ -245,13 +266,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         JSONObject reg = new JSONObject();
         try {
-            // server is set to recognize "messageType" in JSON object and
-            // process data accordingly
-            reg.put("messageType", "register_user");
-            reg.put("username", Variables.username);
-            reg.put("password", Variables.password);
+            // package data to according to server protocols
+            reg.put("message_type", "register");
+            reg.put("user_name", Variables.username);
+            reg.put("user_password", Variables.password);
             reg.put("gcm_user_id", Variables.gcm_user_id);
-            // TODO TEST that this is how server is expecting JSON
 
         } catch (JSONException je) {
             je.printStackTrace();
