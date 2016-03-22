@@ -133,8 +133,10 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "Username: " + username);
         Log.d(TAG, "Password: " + password);
 
+        // make button unclickable to avoid sending multiple registrations
+        view.setClickable(false);
         // username and password sent to server
-        attemptLogin(username, password);
+        attemptLogin(username, password, view);
     }
 
     /**
@@ -142,7 +144,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param username attempted username sign in
      * @param password attempted password sign in
      */
-    private void attemptLogin(String username, String password) {
+    private void attemptLogin(String username, String password, final View view) {
         Log.d(TAG, "attemptLogin");
 
         // requests queue to be sent to server
@@ -162,7 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                                     Log.d(TAG, "onResponse: " + response.toString());
                                     // break down JSON response from server, send user to new
                                     // activity if successful registration, or inform of fail
-                                    interpretResponse(response);
+                                    interpretResponse(response, view);
                                 }
                             },
                             new Response.ErrorListener() {
@@ -194,6 +196,8 @@ public class LoginActivity extends AppCompatActivity {
                                         String confirm = "Re-Try.";
                                         userPopUp(message, confirm);
                                     }
+                                    // turn register button back on after an error
+                                    view.setClickable(true);
                                 }
                             });
 
@@ -207,15 +211,18 @@ public class LoginActivity extends AppCompatActivity {
                     "Please press Re-Try to reattempt to log in.";
             String confirm = "Re-Try.";
             userPopUp(message, confirm);
+            // turn register button back on after an error
+            view.setClickable(true);
         }
     }
 
     /**
      * Takes JSON response from server and decides whether user is
      * authentic or not
+     * @param view the button used to login
      * @param response JSON response from server
      */
-    private void interpretResponse(JSONObject response) {
+    private void interpretResponse(JSONObject response, View view) {
         Log.d(TAG, "interpretResponse() form server");
 
         // attempt to breakdown JSON response
@@ -264,6 +271,8 @@ public class LoginActivity extends AppCompatActivity {
             String confirm = "Re-Try.";
             userPopUp(message, confirm);
         }
+        // turn register button back on after an error
+        view.setClickable(true);
         // clear global variable
         Variables.username = "";
     }

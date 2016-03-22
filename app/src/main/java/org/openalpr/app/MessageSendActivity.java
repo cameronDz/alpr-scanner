@@ -103,11 +103,13 @@ public class MessageSendActivity extends AppCompatActivity {
                 duration);
         toast.show();
 
+        // make button unclickable to avoid sending multiple registrations
+        view.setClickable(false);
         // send message to server
-        sendMessageToServer();
+        sendMessageToServer(view);
     }
 
-    private void sendMessageToServer() {
+    private void sendMessageToServer(final View view) {
         Log.d(TAG, "sendMessageToServer");
 
         // requests queue to be sent to server
@@ -129,7 +131,7 @@ public class MessageSendActivity extends AppCompatActivity {
                                     Log.d(TAG, "onResponse: " + response.toString());
                                     // break down JSON response from server, send user to new
                                     // activity if successful registration, or inform of fail
-                                    interpretResponse(response);
+                                    interpretResponse(response, view);
                                 }
                             },
                             new Response.ErrorListener() {
@@ -160,6 +162,8 @@ public class MessageSendActivity extends AppCompatActivity {
                                                 "reattempt to send your message.";
                                         String confirm = "Re-Try.";
                                         userPopUp(message, confirm);
+                                        // turn register button back on after error
+                                        view.setClickable(true);
                                     }
                                 }
                             });
@@ -181,7 +185,7 @@ public class MessageSendActivity extends AppCompatActivity {
      * Takes response from server and tells user if message was sent successfully
      * @param response servers response to the JSON
      */
-    private void interpretResponse(JSONObject response) {
+    private void interpretResponse(JSONObject response, View view) {
         Log.d(TAG, "interpretResponse");
 
         // attempt to breakdown JSON object
@@ -240,6 +244,9 @@ public class MessageSendActivity extends AppCompatActivity {
             String confirm = "Re-Try.";
             userPopUp(message, confirm);
         }
+
+        // turn register button back on after an error
+        view.setClickable(true);
     }
 
     /**

@@ -100,9 +100,11 @@ public class ConfirmPlateActivity extends AppCompatActivity
         Variables.user_plate = this.plate_number;
         Variables.user_state = this.plate_state;
 
+        // make button unclickable to avoid sending multiple registrations
+        view.setClickable(false);
         // data sent out to server using Volley HTTP POST. determines if plate
         // is available and sends user to activity according to response
-        sendDataToServer();
+        sendDataToServer(view);
     }
 
     /**
@@ -134,7 +136,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
     /**
      * Used to send plate registration data to server
      */
-    private void sendDataToServer() {
+    private void sendDataToServer(final View view) {
         Log.d(TAG, "sendDataToServer");
 
         // requests queue to be sent to server
@@ -155,7 +157,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
                                     Log.d(TAG, "onResponse: " + response.toString());
                                     // break down JSON response from server, send user to new
                                     // activity if successful registration, or inform of fail
-                                    interpretResponse(response);
+                                    interpretResponse(response, view);
                                 }
                             },
                             new Response.ErrorListener() {
@@ -186,6 +188,8 @@ public class ConfirmPlateActivity extends AppCompatActivity
                                                 "reattempt to register your plate.";
                                         String confirm = "Re-Try.";
                                         userPopUp(message, confirm);
+                                        // turn register button back on after error
+                                        view.setClickable(true);
                                     }
                                 }
                             });
@@ -208,7 +212,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
      * registration success/failure
      * @param response the JSON response from a server
      */
-    private void interpretResponse(JSONObject response) {
+    private void interpretResponse(JSONObject response, View view) {
         Log.d(TAG, "interpretResponse");
 
         //attempt to breakdown server JSON response
@@ -258,6 +262,8 @@ public class ConfirmPlateActivity extends AppCompatActivity
             userPopUp(message, confirm);
         }
 
+        // turn register button back on after an error
+        view.setClickable(true);
         // clear plate global variables
         Variables.user_plate = "";
         Variables.user_state = "";
