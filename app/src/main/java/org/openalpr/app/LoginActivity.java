@@ -15,13 +15,16 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Anthony Brignano on 2/17/16.
@@ -144,8 +147,78 @@ public class LoginActivity extends AppCompatActivity {
      * @param username attempted username sign in
      * @param password attempted password sign in
      */
-    private void attemptLogin(String username, String password, final View view) {
+    private void attemptLogin(final String username, final String password, final View view) {
         Log.d(TAG, "attemptLogin");
+
+
+
+        String url = Constants.aws_address;
+        RequestQueue queue = Volley.newRequestQueue(this);  // this = context
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d(TAG, "onResponse: " + response);
+                        // convert response from server to JSON, send user to new
+                        // activity if successful registration, or inform of fail
+                        interpretResponse(response, view);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d(TAG, "Error.Response: " + error.getMessage());
+
+
+                        Log.d(TAG, "Response Error: " + error.getMessage());
+
+                        // check for server timeout error
+                        if (error.networkResponse == null) {
+                            if (error.getClass().equals(TimeoutError.class)) {
+                                Log.d(TAG, "Response Error: server timeout");
+
+                                // display pop up to user informing of server timeout
+                                String message = "There may be a problem with the " +
+                                        "server. Please press Re-Try to reattempt " +
+                                        "to login.";
+                                String confirm = "Re-Try.";
+                                userPopUp(message, confirm, false);
+                            }
+                        } else {
+                            Log.d(TAG, "Error: server problem");
+
+                            // display pop up to user informing of server issue
+                            // usual error is no internet access
+                            String message = "There may be a problem with your " +
+                                    "internet. Please check your connection to " +
+                                    "the internet and press Re-Try to reattempt " +
+                                    "to login.";
+                            String confirm = "Re-Try.";
+                            userPopUp(message, confirm, false);
+                        }
+                        // turn register button back on after error
+                        view.setClickable(true);
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Log.d(TAG, "getParams");
+                Map<String, String> params = new HashMap<>();
+                params.put("message_type", "login");
+                params.put("user_name", username);
+                params.put("user_password", password);
+                params.put("gcm_user_id", Variables.gcm_user_id);
+
+                return params;
+            }
+        };
+        queue.add(postRequest);
+    }
+
+        /*
+
 
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -182,7 +255,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     "server. Please try logging in again. Press " +
                                                     "Re-Try to reattempt to log in.";
                                             String confirm = "Re-Try.";
-                                            userPopUp(message, confirm);
+                                            userPopUp(message, confirm, false);
                                         }
                                     } else {
                                         Log.d(TAG, "Error: server problem");
@@ -194,7 +267,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 "to the internet and press Re-Try to " +
                                                 "reattempt to log in.";
                                         String confirm = "Re-Try.";
-                                        userPopUp(message, confirm);
+                                        userPopUp(message, confirm, false);
                                     }
                                     // turn register button back on after an error
                                     view.setClickable(true);
@@ -210,56 +283,58 @@ public class LoginActivity extends AppCompatActivity {
             String message = "There may be a problem with processing you data. " +
                     "Please press Re-Try to reattempt to log in.";
             String confirm = "Re-Try.";
-            userPopUp(message, confirm);
+            userPopUp(message, confirm, false);
             // turn register button back on after an error
             view.setClickable(true);
         }
-    }
+    }*/
 
     /**
      * Takes JSON response from server and decides whether user is
      * authentic or not
      * @param view the button used to login
-     * @param response JSON response from server
+     * @param sResponse string representation of JSON response from server
      */
-    private void interpretResponse(JSONObject response, View view) {
+    private void interpretResponse(String sResponse, View view) {
         Log.d(TAG, "interpretResponse() form server");
 
         // attempt to breakdown JSON response
         try{
+            // create JSON Object from server response
+            JSONObject jResponse = new JSONObject(sResponse);
             // get login status from JSON object
-            if( response.has("output") ) {
+            if( jResponse.has("output") ) {
                 Log.d(TAG, "interpretResponse() = output");
 
-                String output = response.get("output").toString();
+                String output = jResponse.get("output").toString();
                 // display pop up to user informing of successful log in
                 String message = "Log in successful. " + output +
                         ". Press Continue to access account.";
                 String confirm = "Continue.";
-                userPopUp(message, confirm);
+                userPopUp(message, confirm, true);
 
                 // send user to home activity
                 Intent intent = new Intent(this, ConfirmPlateActivity.class);
                 startActivity(intent);
             // server returned an error
-            } else if( response.has("error") ) {
+            } else if( jResponse.has("error") ) {
                 Log.d(TAG, "interpretResponse() = error");
 
-                String error = response.get("error").toString();
+                String error = jResponse.get("error").toString();
                 // display pop up to user wrong log in info
                 String message = "There was a problem with your username or password. " +
                         error + "Press Re-Try to reattempt log in.";
                 String confirm = "Re-Try.";
-                userPopUp(message, confirm);
+                userPopUp(message, confirm, false);
             // server returns an unexpected response
             } else {
-                Log.d(TAG, "interpretResponse() = unknown response: " + response.toString());
+                Log.d(TAG, "interpretResponse() = unknown response: " + jResponse.toString());
 
                 // display pop up to user bad plate registration data
                 String message = "There was a server problem. " +
                         "Press Re-Try to reattempt to log in.";
                 String confirm = "Re-Try.";
-                userPopUp(message, confirm);
+                userPopUp(message, confirm, false);
             }
         } catch (JSONException je) {
             Log.d(TAG, "JSON get error: " + je);
@@ -269,7 +344,7 @@ public class LoginActivity extends AppCompatActivity {
             String message = "There was an error processing the server response. " +
                     "Sorry for the inconvenience. Press Re-Try to attempt to log in again.";
             String confirm = "Re-Try.";
-            userPopUp(message, confirm);
+            userPopUp(message, confirm, false);
         }
         // turn register button back on after an error
         view.setClickable(true);
@@ -282,7 +357,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param username username to be put into JSON
      * @param password password to be put into JSON
      * @return a JSON object to be sent to server
-     */
+     *
     private JSONObject formatJSONLogin(String username, String password) {
         Log.d(TAG, "formatJSONLogin()");
         JSONObject json = new JSONObject();
@@ -302,7 +377,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         Log.d(TAG, "formatJSONLogin result: " + json.toString() );
         return json;
-    }
+    }*/
 
     /**
      * Register button is pressed, sends user to register activity
@@ -339,17 +414,22 @@ public class LoginActivity extends AppCompatActivity {
      * Create pop up for user to inform about server response or data processing
      * @param message message displayed to user
      * @param confirm acceptance button text
+     * @param pass boolean telling whether method should send to next activity or not
      */
-    private void userPopUp(String message, String confirm) {
-        Log.d(TAG, "errorPopUp");
+    private void userPopUp(String message, String confirm, final boolean pass) {
+        Log.d(TAG, "userPopUp");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message).setCancelable(false).setPositiveButton(confirm,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG, "errorPopUp : onClick");
-                        // do nothing
+                        Log.d(TAG, "userPopUp : onClick");
+                        // sends user to next activity
+                        if( pass ) {
+                            Log.d(TAG, "userPopUp: pass");
+
+                        }
                     }
                 });
         // display message

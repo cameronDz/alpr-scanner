@@ -19,11 +19,14 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Anthony Brignano on 2/23/16.
@@ -56,6 +59,11 @@ import org.json.JSONObject;
  * Added AlertDialog popups to all errors and server processing where the
  * process might be interrupted, an error may occur, and when user is
  * successfully registers a plate to a username.
+ *
+ * date@(23.03.2016) editor@(cameronDz)
+ * Removed Volley JSONRequests and replaced with StringRequests. Removed
+ * unnecessary methods. Now take expected String response from server,
+ * convert to a JSON Object, and extract data from that Object
  */
 
 public class ConfirmPlateActivity extends AppCompatActivity
@@ -139,6 +147,75 @@ public class ConfirmPlateActivity extends AppCompatActivity
     private void sendDataToServer(final View view) {
         Log.d(TAG, "sendDataToServer");
 
+
+
+        Log.d(TAG, "sendDataToServer");
+
+        String url = Constants.aws_address;
+        RequestQueue queue = Volley.newRequestQueue(this);  // this = context
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d(TAG, "onResponse: " + response);
+                        // convert response from server to JSON, send user to new
+                        // activity if successful registration, or inform of fail
+                        interpretResponse(response, view);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d(TAG, "Error.Response: " + error.getMessage());
+
+
+                        Log.d(TAG, "Response Error: " + error.getMessage());
+
+                        // check for server timeout error
+                        if (error.networkResponse == null) {
+                            if (error.getClass().equals(TimeoutError.class)) {
+                                Log.d(TAG, "Response Error: server timeout");
+
+                                // display pop up to user informing of server timeout
+                                String message = "There may be a problem with the " +
+                                        "server. Please press Re-Try to reattempt " +
+                                        "to register.";
+                                String confirm = "Re-Try.";
+                                userPopUp(message, confirm, false);
+                            }
+                        } else {
+                            Log.d(TAG, "Error: server problem");
+
+                            // display pop up to user informing of server issue
+                            // usual error is no internet access
+                            String message = "There may be a problem with your " +
+                                    "internet. Please check your connection to " +
+                                    "the internet and press Re-Try to reattempt " +
+                                    "to register.";
+                            String confirm = "Re-Try.";
+                            userPopUp(message, confirm, false);
+                        }
+                        // turn register button back on after error
+                        view.setClickable(true);
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Log.d(TAG, "getParams");
+                Map<String, String> params = new HashMap<>();
+                params.put( "message_type", "plate" );
+                params.put( "user_id", Integer.toString(Variables.user_id) );
+                params.put( "plate_number", Variables.user_plate );
+                params.put( "plate_state", Variables.user_state );
+
+                return params;
+            }
+        };
+        queue.add(postRequest);
+        /*
+
         // requests queue to be sent to server
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -175,7 +252,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
                                                     "server. Please try registering again. Press " +
                                                     "Re-Try to reattempt to register your plate.";
                                             String confirm = "Re-Try.";
-                                            userPopUp(message, confirm);
+                                            userPopUp(message, confirm, false);
                                         }
                                     } else {
                                         Log.d(TAG, "Error: server problem");
@@ -187,7 +264,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
                                                 "to the internet and press Re-Try to " +
                                                 "reattempt to register your plate.";
                                         String confirm = "Re-Try.";
-                                        userPopUp(message, confirm);
+                                        userPopUp(message, confirm, false);
                                         // turn register button back on after error
                                         view.setClickable(true);
                                     }
@@ -203,51 +280,51 @@ public class ConfirmPlateActivity extends AppCompatActivity
             String message = "There may be a problem with processing you data. " +
                     "Please press Re-Try to reattempt to register your plate.";
             String confirm = "Re-Try.";
-            userPopUp(message, confirm);
-        }
+            userPopUp(message, confirm, false);
+        }*/
+
     }
 
     /**
      * Interprets the response from the server and informs user of plate
      * registration success/failure
-     * @param response the JSON response from a server
+     * @param sResponse the JSON response from a server
+     * @param view button used to send plate data to server
      */
-    private void interpretResponse(JSONObject response, View view) {
+    private void interpretResponse(String sResponse, View view) {
         Log.d(TAG, "interpretResponse");
 
         //attempt to breakdown server JSON response
         try {
+            // create JSON Object from String response from server
+            JSONObject jResponse = new JSONObject(sResponse);
             // logic checking plate was registered, redirecting user accordingly
-            if( response.has("output") ) {
+            if( jResponse.has("output") ) {
                 Log.d(TAG, "interpretResponse() = output");
 
-                String output = response.get("output").toString();
+                String output = jResponse.get("output").toString();
                 // display pop up informing user of successful plate registration
                 String message = "The plate: " + Variables.user_plate + " has been " +
                         "register to user: "+ Variables.username + " successfully. " +
                         "Press Continue to access your home screen. " + output;
                 String confirm = "Continue.";
-                userPopUp(message, confirm);
-
-                // send user to home activity
-                Intent intent = new Intent(this, HomeActivity.class);
-                startActivity(intent);
+                userPopUp(message, confirm, true);
 
             // check for error message
-            } else if ( response.has("error") ) {
+            } else if ( jResponse.has("error") ) {
                 Log.d(TAG, "interpretResponse() = error");
 
                 // get a possible error from JSON
-                String error = response.get("error").toString();
+                String error = jResponse.get("error").toString();
                 // display pop up to user bad plate registration data
                 String message = "There was a problem with your plate or state. " +
                         "The error was: " + error + ". " +
                         "Press Re-Try to reattempt plate registration.";
                 String confirm = "Re-Try.";
-                userPopUp(message, confirm);
+                userPopUp(message, confirm, false);
 
             } else {
-                Log.d(TAG, "interpretResponse() = unknown response: " + response.toString());
+                Log.d(TAG, "interpretResponse() = unknown response: " + jResponse.toString());
 
             }
         } catch (JSONException je) {
@@ -259,7 +336,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
                     "Sorry for the inconvenience. Press Re-Try to attempt to register " +
                     "your plate again.";
             String confirm = "Re-Try.";
-            userPopUp(message, confirm);
+            userPopUp(message, confirm, false);
         }
 
         // turn register button back on after an error
@@ -272,7 +349,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
     /**
      * @return JSON object to be sent and register a plate to a user,
      * on JSONException error, returns empty object
-     */
+     *
     private JSONObject formatJSONPlate() {
         Log.d(TAG, "formatJSONRegister data to send to server");
 
@@ -293,23 +370,30 @@ public class ConfirmPlateActivity extends AppCompatActivity
         }
         Log.d(TAG, "formatJSONPlate: " + plate.toString() );
         return plate;
-    }
+    }*/
 
     /**
      * Create pop up for user to inform about server response or data processing
      * @param message message displayed to user
      * @param confirm acceptance button text
+     * @param pass boolean telling whether method should send to next activity or not
      */
-    private void userPopUp(String message, String confirm) {
-        Log.d(TAG, "errorPopUp");
+    private void userPopUp(String message, String confirm, final boolean pass) {
+        Log.d(TAG, "userPopUp");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message).setCancelable(false).setPositiveButton(confirm,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG, "errorPopUp : onClick");
-                        // do nothing
+                        Log.d(TAG, "userPopUp : onClick");
+                        // send user to next activity if plate registration passes
+                        if( pass ) {
+                            Log.d(TAG, "userPopUp: pass");
+                            // send user to home activity
+                            Intent intent = new Intent(context, HomeActivity.class);
+                            startActivity(intent);
+                        }
                     }
                 });
         // display message
