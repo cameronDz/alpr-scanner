@@ -2,6 +2,7 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +41,8 @@ public class ConfirmPlateActivity extends AppCompatActivity
     protected String plate_number = "";
     protected GoogleCloudMessaging gcm = null;
 
+    private String[] abrv_state;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +65,10 @@ public class ConfirmPlateActivity extends AppCompatActivity
         Log.v(TAG, "TEST TEST TEST: Variables.username = " + Variables.username);
         Log.v(TAG, "TEST TEST TEST: Variables.password = " + Variables.password);
         Log.v(TAG, "TEST TEST TEST: ");
+
+        // get the abrv. version of the states for sending to db
+        Resources res = getResources();
+        abrv_state = res.getStringArray(R.array.states_abbreviated);
     }
 
     public void confirmPlate(View view) {
@@ -129,8 +136,13 @@ public class ConfirmPlateActivity extends AppCompatActivity
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
         // An item was selected. You can retrieve the selected item using
-        Object s = parent.getItemAtPosition(pos);
-        plate_state = s.toString();
+        //Object s = parent.getItemAtPosition(pos);
+//        plate_state = s.toString();
+        int s = parent.getSelectedItemPosition();
+        plate_state = abrv_state[s];
+
+        Log.d(TAG, "abrv_state: " + plate_state);
+
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
