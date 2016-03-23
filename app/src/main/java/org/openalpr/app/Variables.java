@@ -13,19 +13,22 @@ package org.openalpr.app;
  * TODO add file to dump message data into
  */
 public class Variables {
-    //registering user data
+    // registering user data
     protected static String username = "";
     protected static String password = "";
     protected static String user_plate = "";
     protected static String user_state = "";
-    protected static String gcm_user_id = "";
+    // TODO get real GCM ID
+    protected static String gcm_user_id = "10";
     protected static int user_id = 0;
 
     // sending message data
     protected static String plate_to = "";
     protected static String state_to = "";
-    //protected static double gps_lat = 0;
-    //protected static double gps_long = 0;
+    protected static String message = "";
+    protected static String time = "";
+    protected static double gps_lat = 0;
+    protected static double gps_long = 0;
 
     private Variables() {
         // empty
