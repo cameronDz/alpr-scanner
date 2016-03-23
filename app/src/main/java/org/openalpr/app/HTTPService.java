@@ -28,14 +28,16 @@ import java.util.Map;
  * ConfirmPlateActivity, LoginActivity, and MessageSendActivity.
  */
 public class HTTPService {
+    // put activity in TAG for easier Log searching
+    private static String TAG = "HTTPService(Activity)";
+
     // integers representing the associated activities
     protected static final int REGISTER = 1;
     protected static final int PLATE = 2;
     protected static final int LOGIN = 3;
     protected static final int MESSAGE = 4;
-
-    // put activity in TAG for easier Log searching
-    private static String TAG = "HTTPService(Activity)";
+    protected static final int READ = 5;
+    protected static final int REPLY = 6;
 
     /**
      * Used to send data from the app to the AWS server from several different activities.
@@ -46,7 +48,7 @@ public class HTTPService {
     protected static void sendData(final Context context, final View view, final int activity) {
         Log.d(TAG, "sendData");
 
-        String url = Constants.aws_address;
+        String url = Variables.AWS_ADDRESS;
         RequestQueue queue = Volley.newRequestQueue(context);
         StringRequest postRequest = new StringRequest
                 (Request.Method.POST, url, new Response.Listener<String>() {
@@ -119,8 +121,15 @@ public class HTTPService {
                     params.put("message_sent_timestamp", Variables.time);
                     params.put("gps_lat", Double.toString(Variables.gps_lat) );
                     params.put("gps_lon", Double.toString(Variables.gps_long) );
-                    params.put("message_sender_content", Variables.message);
+                    params.put("message_sender_content", Variables.message );
+                } else if( activity == READ ) {
+                    // acknowledge message received
+                    params.put("message_type", "read");
+                } else if(activity == REPLY ) {
+                    // sending a reply to a message
+                    params.put("message_type", "reply");
                 }
+
                 Log.d(TAG, "params.toString() : " + params.toString() );
                 return params;
             }
@@ -166,6 +175,10 @@ public class HTTPService {
                             "register to user: "+ Variables.username + " successfully. " +
                             "Press Continue to access your home screen. " + output;
                 } else if( activity == LOGIN ) {
+                    // TODO add user_id to response json to put in variables class
+                    // TODO currently throws error
+                    // store user id response from server
+                    //Variables.user_id = (Integer) jResponse.get("user_id");
                     // set popup message
                     message = "Log in successful. Press Continue to access your " +
                     "account. " + output;
@@ -182,6 +195,14 @@ public class HTTPService {
                     Variables.gps_long = 0;
                     Variables.gps_lat = 0;
                     Variables.time = "";
+                } else if( activity == READ ) {
+                    // TODO add functionality to this
+                    message = "Server acknowledges you read your latest message. " +
+                            "Press Continue to return to your home screen" + output;
+                } else if( activity == REPLY ) {
+                    // TODO add functionality to this
+                    message = "Server acknowledges you replied to your latest message. " +
+                            "Press Continue to return to your home screen" + output;
                 }
             } else {
                 Log.d(TAG, "interpretResponse() = error: " + jResponse.toString());
@@ -263,6 +284,10 @@ public class HTTPService {
             s = "log in";
         } else if(act == MESSAGE) {
             s = "send a message";
+        } else if(act == READ) {
+            s = "read a message";
+        } else if(act == REPLY) {
+            s = "reply to a message";
         }
         return s;
     }

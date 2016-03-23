@@ -40,6 +40,12 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         // set context, used in sending data to server
         context = this;
+
+        // check for gcm token, get one if there isn't one
+        if(Variables.gcm_user_id.equals("") ) {
+            Log.d(TAG, "GCM: acquire new gcm_user_id");
+
+        }
     }
 
     /**
