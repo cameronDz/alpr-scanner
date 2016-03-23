@@ -136,8 +136,8 @@ public class ConfirmPlateActivity extends AppCompatActivity
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
         // An item was selected. You can retrieve the selected item using
-        //Object s = parent.getItemAtPosition(pos);
-//        plate_state = s.toString();
+
+        // get the abrv version of the plate from the displayed full state name drop down
         int s = parent.getSelectedItemPosition();
         plate_state = abrv_state[s];
 
