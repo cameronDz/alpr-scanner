@@ -13,7 +13,7 @@ import com.google.android.gms.iid.InstanceID;
 
 /**
  * Created by Cameron on 3/4/2016.
- *
+ * Used to get registration token for user.
  */
 public class RegistrationIntentService extends IntentService {
     private static final String TAG = "IntentService(Activity)";

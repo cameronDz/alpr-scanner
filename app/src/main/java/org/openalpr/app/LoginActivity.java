@@ -50,17 +50,18 @@ public class LoginActivity extends AppCompatActivity {
 
         // check for gcm token, get one if there isn't one
         if(Variables.gcm_user_id.equals("") ) {
+            // get an instance id
             Variables.gcm_inst_id = InstanceID.getInstance(context).getId();
-
             // off main thread, obtain token to be user_gcm_id
             new AsyncTask<Void, Void, String>() {
                 @Override
                 protected String doInBackground(Void... params) {
                     Log.v(TAG, "doInBackGround");
-                    String msg = "FAIL";
+                    String msg = "Failed to Obtain";
                     String authorizedEntity = Variables.SENDER_ID;
                     String scope = "GCM";
                     try {
+                        // attempt to get token
                         Variables.gcm_user_id = InstanceID.getInstance(context).getToken(authorizedEntity, scope);
                         msg = Variables.gcm_user_id;
                         Log.v(TAG, "gcm_user_id: " + Variables.gcm_user_id);
@@ -68,13 +69,13 @@ public class LoginActivity extends AppCompatActivity {
                         e.printStackTrace();
                         Log.v(TAG, "GCM IOException: " + e);
                     }
-
                     return msg;
                 }
 
+                // Log the msg return from Task
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d(TAG, "onPostExecute");
+                    Log.d(TAG, "onPostExecute: " + msg);
                 }
             }.execute(null, null, null);
         }

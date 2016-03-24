@@ -31,7 +31,7 @@ public class Variables {
     protected static String TAG = "Variables(Activity)";
 
     // constants used to register with GCM and make HTTP POST requests
-    protected static final String APPLICATION_ID = "org.openalpr.app";
+    //protected static final String APPLICATION_ID = "org.openalpr.app";
     protected static final String AWS_ADDRESS = "http://107.21.62.238";
     protected static final String SENDER_ID = "938965101228";
     // file name that holds messages sent to user locally
@@ -42,7 +42,6 @@ public class Variables {
     protected static String password = "";
     protected static String user_plate = "";
     protected static String user_state = "";
-    // TODO get GCM ID through AsyncTask
     protected static String gcm_user_id = "";
     protected static String gcm_inst_id = "";
     protected static int user_id = 0;
@@ -113,12 +112,10 @@ public class Variables {
             }
 
             // loop through file until there is no next line
-            int i = 0;
             String line = br.readLine();
             while( line != null ) {
                 s.add(line);
                 line = br.readLine();
-                i++;
             }
 
         } catch (FileNotFoundException e) {
