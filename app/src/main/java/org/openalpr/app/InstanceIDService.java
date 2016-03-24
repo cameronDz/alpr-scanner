@@ -1,16 +1,14 @@
 package org.openalpr.app;
 
-
-
 import android.content.Intent;
 
 import com.google.android.gms.iid.InstanceIDListenerService;
 
 /**
- *
  * Created by Cameron on 3/4/2016.
+ *
  */
-public class MyInstanceIDListenerService extends InstanceIDListenerService {
+public class InstanceIDService extends InstanceIDListenerService {
 
     private static final String TAG = "MyInstanceIDLS";
 

@@ -36,14 +36,14 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="org.openalpr.app.MyGcmListenerService"
+        <service android:name="org.openalpr.app.GcmListenerService"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
 
-        <service android:name="org.openalpr.app.MyInstanceIDListenerService"
+        <service android:name="org.openalpr.app.InstanceIDService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID" />

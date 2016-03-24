@@ -2,11 +2,17 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
+
+import java.io.IOException;
 
 /**
  * Created by Anthony Brignano on 2/17/16.
@@ -40,11 +46,37 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         // set context, used in sending data to server
         context = this;
+        GoogleCloudMessaging.getInstance(context);
 
         // check for gcm token, get one if there isn't one
         if(Variables.gcm_user_id.equals("") ) {
-            Log.d(TAG, "GCM: acquire new gcm_user_id");
+            Variables.gcm_inst_id = InstanceID.getInstance(context).getId();
 
+            // off main thread, obtain token to be user_gcm_id
+            new AsyncTask<Void, Void, String>() {
+                @Override
+                protected String doInBackground(Void... params) {
+                    Log.v(TAG, "doInBackGround");
+                    String msg = "FAIL";
+                    String authorizedEntity = Variables.SENDER_ID;
+                    String scope = "GCM";
+                    try {
+                        Variables.gcm_user_id = InstanceID.getInstance(context).getToken(authorizedEntity, scope);
+                        msg = Variables.gcm_user_id;
+                        Log.v(TAG, "gcm_user_id: " + Variables.gcm_user_id);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Log.v(TAG, "GCM IOException: " + e);
+                    }
+
+                    return msg;
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d(TAG, "onPostExecute");
+                }
+            }.execute(null, null, null);
         }
     }
 
