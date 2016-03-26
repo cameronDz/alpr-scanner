@@ -1,8 +1,10 @@
 package org.openalpr.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 /**
  * Created by Anthony Brignano on 2/19/16.
@@ -26,6 +28,11 @@ public class InboxActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inbox);
         context = this;
+    }
+
+    public void redirectToMessageView(View view) {
+        Intent intent = new Intent(context, MessageViewActivity.class);
+        startActivity(intent);
     }
 
 }

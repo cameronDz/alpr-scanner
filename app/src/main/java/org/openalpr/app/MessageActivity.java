@@ -22,6 +22,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 
 /**
+ *
+ * CAN BE DELETED - REPLACED BY MessageSendActivity.java (needed a more specific class name)
+ *
  * Created by Anthony Brignano on 2/14/16.
  *
  * MessageActivity: For composing and sending a message
