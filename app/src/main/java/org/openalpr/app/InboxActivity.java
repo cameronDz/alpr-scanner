@@ -35,4 +35,9 @@ public class InboxActivity extends AppCompatActivity{
         startActivity(intent);
     }
 
+    public void redirectToMap(View view) {
+        Intent intent = new Intent(context, MapActivity.class);
+        startActivity(intent);
+    }
+
 }

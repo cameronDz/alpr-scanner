@@ -32,6 +32,14 @@
             android:layout_gravity="center_horizontal"
             android:onClick="redirectToMessageView" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View Map"
+            android:id="@+id/btn_map"
+            android:layout_gravity="center_horizontal"
+            android:onClick="redirectToMap" />
+
     </LinearLayout>
 
 </ScrollView>

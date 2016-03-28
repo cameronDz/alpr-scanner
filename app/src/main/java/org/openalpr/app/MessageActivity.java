@@ -49,7 +49,6 @@ public class MessageActivity extends AppCompatActivity implements
     private String TAG = "MessageActivity";
     private LatLng mLatLng = null;
     private Location mLastLocation = null;
-
     private String state;
     private String plate;
 

@@ -20,7 +20,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
-import android.view.WindowManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -32,11 +31,7 @@ import android.widget.RelativeLayout;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
@@ -78,7 +73,8 @@ import java.util.Locale;
  *
  */
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private int MY_PERMISSIONS_CAMERA, MY_PERMISSIONS_ACCESS_FINE_LOCATION, MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -86,8 +82,11 @@ public class CameraActivity extends AppCompatActivity {
     private Camera mCamera;
     private Context context;
     private CameraPreview mPreview;
+    private LatLng mLatLng_Exif;
+    private Location mLastLocation = null;
     private LatLng mLatLng;
     private float mDist = 0;
+    private GoogleApiClient mGoogleApiClient;
     private String mDateTime = null;
     private String tempFilePath;
 
@@ -97,6 +96,15 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         startCamera();
         context = this;
+
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         // Add a listener to the Capture button
         Button captureButton = (Button) findViewById(R.id.button_capture);
@@ -136,6 +144,7 @@ public class CameraActivity extends AppCompatActivity {
             stopCamera();
 
         }
+        mGoogleApiClient.disconnect();
         super.onStop();
     }
 
@@ -146,6 +155,11 @@ public class CameraActivity extends AppCompatActivity {
         startCamera();
     }
 
+    @Override
+    protected void onStart(){
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
@@ -158,22 +172,53 @@ public class CameraActivity extends AppCompatActivity {
              * will have to move the getting of latitude and longitude to where the intent is for
              * directing to the next activity so that they can be passes as intent extras to be
              * available
+             *
+             * the mLatLng variable has a class scope so it can be accessed from anywhere?
              */
 
-            /** need to remove this or just let the exif location method run after this sets mLatLng */
 
-            /*if(tempFilePath != null){
-                getPhotoInfo(tempFilePath);
-            }*/
-
-            if(mLatLng != null) {
+            if(mLatLng != null && mLatLng_Exif == null) {
                 Double lng = mLatLng.longitude;
                 Double lat = mLatLng.latitude;
                 String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
-                Log.d(TAG, "Current LatLng: " + latlng);
+                Log.d(TAG, "LatLng FROM GPS: " + latlng);
+            } else if(mLatLng_Exif != null) {
+                Double lng = mLatLng_Exif.longitude;
+                Double lat = mLatLng_Exif.latitude;
+                String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+                Log.d(TAG, "LatLng FROM PHOTO: " + latlng);
             }
         }
     };
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // check if API version is 23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            // check if permission is granted
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            }
+        }
+        else{
+            // if API version is not 23 just set mLastLocation
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        }
+        // set LatLng variable -- not sure if this is necessary, mLastLocation already exists as a Location variable
+        if (mLastLocation != null) {
+            mLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i){
+        // code to be run when connection is stopped
+    }
+    @Override
+    public void onConnectionFailed(ConnectionResult cr){
+        // code to be run when connection fails
+    }
 
 
     /** A safe way to get an instance of the Camera object. */
@@ -594,9 +639,16 @@ public class CameraActivity extends AppCompatActivity {
                     lon = 0 - convertToDegree(attr_longitude);
                 }
 
-                mLatLng = new LatLng(lat, lon);
-                Log.d(TAG, "FROM PHOTO GPS: " + mLatLng.toString());
-                Log.d(TAG, "FROM PHOTO DATETIME: " + mDateTime);
+                mLatLng_Exif = new LatLng(lat, lon);
+                Log.d(TAG, "GPS FROM PHOTO: " + mLatLng_Exif.toString());
+                Log.d(TAG, "DATETIME FROM PHOTO: " + mDateTime);
+            }
+            else{
+                Log.d(TAG, "Photo Exif data appears to be null.");
+                Log.d(TAG, "lat = " + attr_latitude);
+                Log.d(TAG, "lat_ref = " + attr_latitude_ref);
+                Log.d(TAG, "lon = " + attr_longitude);
+                Log.d(TAG, "long_ref = " + attr_longitude_ref);
             }
 
 

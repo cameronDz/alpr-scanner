@@ -75,7 +75,9 @@
                 android:scaleType="fitXY"
                 android:layout_weight="1"
                 android:onClick="sendFeedback"
-                android:contentDescription="negative" />
+                android:contentDescription="negative"
+                android:background="#fd1f1f"
+                android:padding="10dp" />
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -85,7 +87,9 @@
                 android:src="@drawable/dont_care"
                 android:scaleType="fitXY"
                 android:onClick="sendFeedback"
-                android:contentDescription="neutral" />
+                android:contentDescription="neutral"
+                android:background="#ffeb53"
+                android:padding="10dp" />
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -95,7 +99,9 @@
                 android:src="@drawable/thumbs_up"
                 android:layout_weight="1"
                 android:onClick="sendFeedback"
-                android:contentDescription="positive" />
+                android:contentDescription="positive"
+                android:padding="10dp"
+                android:background="#39ff2f" />
         </LinearLayout>
 
     </LinearLayout>
