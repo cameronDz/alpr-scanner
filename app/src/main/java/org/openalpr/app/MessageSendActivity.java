@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -47,12 +48,13 @@ public class MessageSendActivity extends AppCompatActivity {
 
     private Context context;
     // message data
+
     protected String state;
     
     protected String plate;
     
     protected String message;
-    
+
     protected double gpsLong;
     
     protected double gpsLat;

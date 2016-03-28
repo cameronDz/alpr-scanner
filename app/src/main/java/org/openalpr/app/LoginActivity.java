@@ -12,6 +12,8 @@ import android.widget.EditText;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -39,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private Context context;
+    private String testJSON = convertJson("0101", "December 21, 2012", "0.1", "0.2", "1");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,9 @@ public class LoginActivity extends AppCompatActivity {
         // set context, used in sending data to server
         context = this;
         GoogleCloudMessaging.getInstance(context);
+
+        // TESTING PURPOSE
+        storeMessage(testJSON, context);
 
         // check for gcm token, get one if there isn't one
         if(Variables.gcm_user_id.equals("") ) {
@@ -143,4 +149,56 @@ public class LoginActivity extends AppCompatActivity {
 
         startActivity(scanIntent);
     }
+    /**
+     * TESTING!!!!
+     * Will be how a message is broken down and saved on a device
+     * @param sMessage string representation of JSON object of message
+     * @param context context in which the file is being written
+     */
+    protected void storeMessage(String sMessage, Context context) {
+        Log.d(TAG, "receiveMessage: " + sMessage);
+
+        // add new line character to the end of the message
+        sMessage = sMessage + "\n";
+        FileOutputStream file;
+        // open file to be written to
+        try {
+            file = context.openFileOutput(Variables.MESSAGE_FILE, Context.MODE_APPEND);
+            // write new message to file
+            try {
+                file.write( sMessage.getBytes() );
+                file.close();
+            } catch (IOException e) {
+                Log.d(TAG, "IOException: " + e);
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "FileNotFoundException: " + e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Convert the GCM Bundle data into a string representation of a
+     * JSON object for storing purposes
+     * @param mid message id
+     * @param timestamp timestamp of message
+     * @param gpsLon longitude coordinates of incident
+     * @param gpsLat latitude coordinates of incident
+     * @param message user message
+     * @return JSON object of data
+     */
+    protected String convertJson(String mid, String timestamp, String gpsLon, String gpsLat, String message) {
+        Log.d(TAG, "convertJSON");
+        String json = "{\"mid\":\""         + mid       + "\"," +
+                "\"timestamp\":\""   + timestamp + "\"," +
+                "\"gps_lon\":\""     + gpsLon    + "\"," +
+                "\"gps_lat\":\""     + gpsLat    + "\"," +
+                "\"message\":\""     + message   + "\"}";
+        // read : 0 or 1
+        // TODO add boolean for read/not read
+        Log.d(TAG,"convertJSON result: " + json);
+        return json;
+    }
+
 }

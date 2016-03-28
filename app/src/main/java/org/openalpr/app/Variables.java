@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ import java.util.ArrayList;
  * will be processed.
  */
 public class Variables {
-    // TODO remove once writeData() method is moved to different class
     // put activity in TAG for easier Log searching
     protected static String TAG = "Variables(Activity)";
 
@@ -56,35 +54,6 @@ public class Variables {
 
     private Variables() {
         // empty
-    }
-
-    // TODO move to appropriate class (GCM related)
-    /**
-     * Will be how a message is broken down and saved on a device
-     * @param sMessage string representation of JSON object of message
-     * @param context context in which the file is being written
-     */
-    protected static void receiveMessage(String sMessage, Context context) {
-        Log.d(TAG, "receiveMessage: " + sMessage);
-
-        // add new line character to the end of the message
-        sMessage = sMessage + "\n";
-        FileOutputStream file;
-        // open file to be written to
-        try {
-            file = context.openFileOutput(Variables.MESSAGE_FILE, Context.MODE_APPEND);
-            // write new message to file
-            try {
-                file.write( sMessage.getBytes() );
-                file.close();
-            } catch (IOException e) {
-                Log.d(TAG, "IOException: " + e);
-                e.printStackTrace();
-            }
-        } catch (FileNotFoundException e) {
-            Log.d(TAG, "FileNotFoundException: " + e);
-            e.printStackTrace();
-        }
     }
 
     /**
