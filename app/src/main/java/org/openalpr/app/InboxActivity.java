@@ -41,13 +41,29 @@ import java.util.List;
 public class InboxActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static String TAG = "InboxActivity";
+
     private Context context;
+
+//    private ArrayList<messages> messages;
+//
+//    private ArrayAdapter<messages> adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inbox);
         context = this;
+
+//
+//        messages = new ArrayList<messages>;
+//        adapter = new ArrayAdapter<messages>(
+//                this,
+//                R.layout.message_list_item,
+//                R.id.item_text,
+//                messages
+//        );
+
 
 
     // dummy array list of messages for testing
@@ -94,19 +110,23 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ListView messageListView = (ListView) findViewById(R.id.inbox_list);
-        String messageItem = messageListView.getItemAtPosition(position).toString();
-        Toast.makeText(this, messageItem, Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "open message " + messageItem);
+        final String item = parent.getItemAtPosition(position).toString();
+        Toast.makeText(this, item, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "open message " + item);
         Log.d(TAG, "Position " + position);
 
+        ImageView imageView = (ImageView) view.findViewById(R.id.mail_picture);
+        imageView.setVisibility(View.INVISIBLE);
+
+    }
+}
 
 //        getView(position, messageListView, parent);
 
 
         // open the message view
 //        Intent intent = new Intent(this, MessageViewActivity.class);
-    }
+
 
 //    public View getView (int position, View convertView, ViewGroup parent){
 //
@@ -123,7 +143,3 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
 ////        imageView.setVisibility(View.INVISIBLE);
 //        return convertView;
 //    }
-
-
-
-}
