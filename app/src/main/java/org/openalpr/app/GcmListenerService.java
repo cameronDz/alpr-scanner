@@ -114,6 +114,8 @@ public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerSe
                        "\"gps_lon\":\""     + gpsLon    + "\"," +
                        "\"gps_lat\":\""     + gpsLat    + "\"," +
                        "\"message\":\""     + message   + "\"}";
+                       // read : 0 or 1
+        // TODO add boolean for read/not read
         Log.d(TAG,"convertJSON result: " + json);
         return json;
     }
