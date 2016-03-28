@@ -58,9 +58,12 @@
         </activity>
 
         <activity android:name=".CameraActivity" />
+
         <activity android:name=".ScanPlate" />
+
         <activity android:name=".MessageActivity" />
         <activity android:name=".VerifyPlateActivity"/>
+
             <!--android:screenOrientation="portrait"/>-->
         <activity android:name=".MessageSendActivity" />
             <!--android:screenOrientation="portrait"/>-->

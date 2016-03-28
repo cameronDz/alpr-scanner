@@ -2,7 +2,10 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.os.AsyncTask;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -39,12 +42,18 @@ public class MessageSendActivity extends AppCompatActivity {
     private String TAG = "MessageSendActivity";
     private Context context;
     // message data
-    protected String state;
-    protected String plate;
-    protected String message;
     protected double gpsLong;
     protected double gpsLat;
     protected String time;
+
+
+    private String state;
+
+    private String plate;
+
+    private String message;
+
+    private GoogleCloudMessaging gcm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
