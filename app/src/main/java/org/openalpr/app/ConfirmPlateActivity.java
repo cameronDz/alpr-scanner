@@ -1,6 +1,9 @@
 package org.openalpr.app;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -41,6 +44,8 @@ public class ConfirmPlateActivity extends AppCompatActivity
     private String plate_state = "";
     protected String plate_number = "";
 
+    private String[] abrv_state;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
@@ -59,6 +64,16 @@ public class ConfirmPlateActivity extends AppCompatActivity
         spinner.setOnItemSelectedListener(this);
         // set context, used in sending data to server
         context = this;
+
+        Log.v(TAG, "TEST TEST TEST: ");
+        Log.v(TAG, "TEST TEST TEST: Variables.username = " + Variables.username);
+        Log.v(TAG, "TEST TEST TEST: Variables.password = " + Variables.password);
+        Log.v(TAG, "TEST TEST TEST: ");
+
+        // get the abrv. version of the states for sending to db
+        Resources res = getResources();
+        abrv_state = res.getStringArray(R.array.states_abbreviated);
+
     }
 
     /**
@@ -81,6 +96,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
         HTTPService.sendData(context, view, 2);
     }
 
+
     /**
      * Determines the state for the license plate by getting it from a spinner which
      * a user selects from on the GUI
@@ -89,10 +105,16 @@ public class ConfirmPlateActivity extends AppCompatActivity
      * @param pos    position of spinner -- state being selected
      * @param id     id in XML of spinner
      */
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        //  retrieve the selected item from spinner
-        Object s = parent.getItemAtPosition(pos);
-        plate_state = s.toString();
+    public void onItemSelected(AdapterView<?> parent, View view,
+                               int pos, long id) {
+        // An item was selected. You can retrieve the selected item using
+
+        // get the abrv version of the plate from the displayed full state name drop down
+        int s = parent.getSelectedItemPosition();
+        plate_state = abrv_state[s];
+
+        Log.d(TAG, "abrv_state: " + plate_state);
+
     }
 
     /**

@@ -2,12 +2,19 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import java.io.IOException;
+
 
 /**
  * Created by Anthony Brignano on 2/14/16.
@@ -37,14 +44,23 @@ import android.widget.Toast;
 public class MessageSendActivity extends AppCompatActivity {
 
     private String TAG = "MessageSendActivity";
+
     private Context context;
     // message data
     protected String state;
+    
     protected String plate;
+    
     protected String message;
+    
     protected double gpsLong;
+    
     protected double gpsLat;
+    
     protected String time;
+
+    private GoogleCloudMessaging gcm = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
