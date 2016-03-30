@@ -2,6 +2,7 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,22 +14,26 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import java.io.IOException;
-
 /**
  * Created by Anthony Brignano on 2/23/16.
  *
  * ConfirmPlateActivity: For registration of new plate
  *      (associated view activity_confirm_plate)
  *
- *      - confirmPlate(View): verifies plate credentials and redirects user to HomeActivity.java (activity_home.xml)
- *      - onItemSelected(AdapterView): sets plate_state variable to the state selected (from the spinner)
+ *      - confirmPlate(View): verifies plate credentials and redirects
+ *          user to HomeActivity.java (activity_home.xml)
+ *      - onItemSelected(AdapterView): sets plate_state variable to
+ *          the state selected (from the spinner)
  *      - onNothingSelected(AdapterView)
  *      - onCreate(Bundle)
  *
- * version@(7.3.2016) user@(cameronDz)
+ * date@(23.03.2016) editor@(cameronDz)
+ * Removed all methods and calls within class dealing with sending data to
+ * the server, and replaced with one call in the ConfirmPlate listener that
+ * sends all HTTP POST and server response interpretation to the HTTPService
+ * class. Class handles all errors and redirects depending. Also removed all
+ * old date/editor comments pertaining to server interaction, since no longer
+ * relevant to this class.
  */
 
 public class ConfirmPlateActivity extends AppCompatActivity
@@ -38,10 +43,12 @@ public class ConfirmPlateActivity extends AppCompatActivity
     private Context context;
     private String plate_state = "";
     protected String plate_number = "";
-    protected GoogleCloudMessaging gcm = null;
+
+    private String[] abrv_state;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm_plate);
 
@@ -55,92 +62,70 @@ public class ConfirmPlateActivity extends AppCompatActivity
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
-
+        // set context, used in sending data to server
         context = this;
 
         Log.v(TAG, "TEST TEST TEST: ");
         Log.v(TAG, "TEST TEST TEST: Variables.username = " + Variables.username);
         Log.v(TAG, "TEST TEST TEST: Variables.password = " + Variables.password);
         Log.v(TAG, "TEST TEST TEST: ");
+
+        // get the abrv. version of the states for sending to db
+        Resources res = getResources();
+        abrv_state = res.getStringArray(R.array.states_abbreviated);
+
     }
 
+    /**
+     * User presses confirm plate, data sent out to server to check plate
+     * @param view button pressed to confirm plate
+     */
     public void confirmPlate(View view) {
-        EditText p = (EditText)findViewById(R.id.plate_number);
+        Log.d(TAG, "ConfirmPlate Button Pressed");
+        EditText p = (EditText) findViewById(R.id.plate_number);
         plate_number = p.getText().toString();
-        context = getApplicationContext();
 
-        gcm = GoogleCloudMessaging.getInstance(context);
-
-        Log.d(TAG, "Plate Number: " + plate_number);
-        Log.d(TAG, "Plate State: " + plate_state);
-
-        // for sending gcm
+        // store user selected plate/state in global variables
         Variables.user_plate = this.plate_number;
         Variables.user_state = this.plate_state;
 
-        // Logic needs to be added to this variable based on the database interaction(s)
-        Boolean plateConfirmationComplete = true;
-
-        if(plateConfirmationComplete){
-
-            //gcm sends hi message to server
-            Log.v("GCM_PRINT gcm: ", gcm.toString());
-            new AsyncTask<Void, Void, String>() {
-                @Override
-                protected String doInBackground(Void... params) {
-                    String msg = "Sent message";
-                    try {
-                        Bundle data = new Bundle();
-                        data.putString("messageType", "register_user");
-                        data.putString("username", Variables.username);
-                        data.putString("password", Variables.password);
-                        data.putString("plateString", Variables.user_plate);
-                        data.putString("plateState", Variables.user_state);
-                        String id = Integer.toString(Constants.MSG_ID) + "alpr";
-                        Constants.MSG_ID++;
-                        Log.v(TAG, "GCM_SEND BEFORE_TOKEN: " + Constants.REG_TOKEN);
-                        Log.v(TAG, "GCM_SEND BEFORE_PROJECT_ID: " + Constants.PROJECT_ID);
-                        gcm.send(Constants.PROJECT_ID + "@gcm.googleapis.com", id, data);
-                        Log.v(TAG, "GCM_SEND AFTER_data: " + data.toString());
-                    } catch (IOException ex) {
-                        msg = "Error :" + ex.getMessage();
-                        Log.v(TAG, "GCM_SEND " + msg);
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                        msg = "Error : " + e.getMessage();
-                        Log.v(TAG, "GCM_SEND " + msg);
-                    }
-                    return msg;
-                }
-
-                @Override
-                protected void onPostExecute(String msg) {
-                    // mDisplay.append(msg + "\n");
-                }
-            }.execute(null, null, null);
-
-
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
-        }
+        // make button unclickable to avoid sending multiple registrations
+        view.setClickable(false);
+        // data sent out to server using Volley HTTP POST. determines if plate
+        // is available and sends user to activity according to response
+        HTTPService.sendData(context, view, 2);
     }
 
+
+    /**
+     * Determines the state for the license plate by getting it from a spinner which
+     * a user selects from on the GUI
+     * @param parent AdapterView for spinner
+     * @param view   View spinner is in
+     * @param pos    position of spinner -- state being selected
+     * @param id     id in XML of spinner
+     */
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
         // An item was selected. You can retrieve the selected item using
-        Object s = parent.getItemAtPosition(pos);
-        plate_state = s.toString();
+
+        // get the abrv version of the plate from the displayed full state name drop down
+        int s = parent.getSelectedItemPosition();
+        plate_state = abrv_state[s];
+
+        Log.d(TAG, "abrv_state: " + plate_state);
+
     }
 
+    /**
+     * Error message for no state being selected.
+     * @param parent Adapter View for spinner
+     */
     public void onNothingSelected(AdapterView<?> parent) {
-        // Another interface callback
+        // interface callback
         String message = "Error: No state selected.";
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, message, duration);
         toast.show();
     }
-
-
-
 }

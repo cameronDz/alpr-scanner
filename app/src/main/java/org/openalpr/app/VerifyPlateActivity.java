@@ -16,9 +16,6 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-
-import static org.openalpr.app.AppConstants.JSON_RESULT_ARRAY_NAME;
 
 /**
  *  Created by Travis
@@ -162,10 +159,6 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
     /** Called when the user clicks the button to verify the plate */
     public void submitPlate(View view) {
-        // send plate and state to global Variable class
-        Variables.plate_to = plateArray[0];
-        Variables.state_to = state;
-
         TextView textView = (TextView) findViewById(R.id.plateTextView);
 
         Intent intent = new Intent(this, MessageSendActivity.class);

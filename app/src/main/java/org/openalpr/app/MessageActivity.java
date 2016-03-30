@@ -35,8 +35,7 @@ import com.google.android.gms.maps.model.LatLng;
  *      - onConnectionSuspended(int)
  *      - onConnectionFailed(ConnectionResult)
  *
- * TO DO:
- *  - Add method to save which image was selected to a text file on users device
+ * TODO: Add method to save which image was selected to a text file on users device
  */
 
 public class MessageActivity extends AppCompatActivity implements
