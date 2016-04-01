@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -78,6 +80,8 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
     private List<AlprCandidate> candList;
 
+    private LatLng mLatLng;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +110,9 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         mImageView = (ImageView) findViewById(R.id.imageView);
         Intent intent = getIntent();
         mCurrentPhotoPath = intent.getStringExtra("picture");
-
+        Bundle bundle = intent.getParcelableExtra("latlng");
+        mLatLng = bundle.getParcelable("mlatlng");
+        Log.d(TAG, "latlng after parsing " + mLatLng.latitude + ", "+ mLatLng.longitude);
 
         handleBigCameraPhoto();
         startScanPlate();
@@ -251,6 +257,10 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         intent.putExtra("recognized", alprResult.isRecognized());
         intent.putExtra("plateList", plateArray);
         intent.putStringArrayListExtra("candidateList", candidateList);
+
+        Bundle args = new Bundle();
+        args.putParcelable("mlatlng", mLatLng);
+        intent.putExtra("latlng", args);
         progressDialog.dismiss();
         startActivity(intent);
 

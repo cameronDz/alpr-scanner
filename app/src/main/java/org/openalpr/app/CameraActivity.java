@@ -177,17 +177,6 @@ public class CameraActivity extends AppCompatActivity implements
              */
 
 
-            if(mLatLng != null && mLatLng_Exif == null) {
-                Double lng = mLatLng.longitude;
-                Double lat = mLatLng.latitude;
-                String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
-                Log.d(TAG, "LatLng FROM GPS: " + latlng);
-            } else if(mLatLng_Exif != null) {
-                Double lng = mLatLng_Exif.longitude;
-                Double lat = mLatLng_Exif.latitude;
-                String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
-                Log.d(TAG, "LatLng FROM PHOTO: " + latlng);
-            }
         }
     };
 
@@ -204,10 +193,12 @@ public class CameraActivity extends AppCompatActivity implements
         else{
             // if API version is not 23 just set mLastLocation
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Log.d(TAG, mLastLocation.toString());
         }
         // set LatLng variable -- not sure if this is necessary, mLastLocation already exists as a Location variable
         if (mLastLocation != null) {
             mLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            Log.d(TAG, mLatLng.latitude + ", " + mLatLng.longitude);
         }
     }
 
@@ -356,8 +347,25 @@ public class CameraActivity extends AppCompatActivity implements
                 /** here is where you need to get the information from exif */
                 getPhotoInfo(tempFilePath);
 
+                if(mLatLng != null && mLatLng_Exif == null) {
+                    Double lng = mLatLng.longitude;
+                    Double lat = mLatLng.latitude;
+                    String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+                    Log.d(TAG, "LatLng FROM GPS: " + latlng);
+                } else if(mLatLng_Exif != null) {
+                    Double lng = mLatLng_Exif.longitude;
+                    Double lat = mLatLng_Exif.latitude;
+                    String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+                    Log.d(TAG, "LatLng FROM PHOTO: " + latlng);
+                }
+                Bundle args = new Bundle();
+                args.putParcelable("mlatlng", mLatLng);
+
+
                 Intent intent = new Intent(context, ScanPlate.class);
                 intent.putExtra("picture", tempFilePath);
+                intent.putExtra("latlng", args);
+                Log.d(TAG, "latlng after putExtra " + mLatLng.latitude + ", " + mLatLng.longitude);
                 CameraActivity.this.startActivity(intent);
 
             } catch (IOException e) {
