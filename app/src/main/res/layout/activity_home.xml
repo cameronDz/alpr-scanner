@@ -43,7 +43,7 @@
             android:textSize="50sp"
             android:layout_marginTop="20dp"
             android:layout_gravity="center_horizontal"
-            android:minHeight="200sp" />
+            android:longClickable="true" />
 
         <Button
             android:layout_width="match_parent"
@@ -53,8 +53,18 @@
             android:id="@+id/button_camera"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
+            android:textSize="50sp" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Add Plate"
+            android:onClick="redirectToConfirmPlate"
+            android:id="@+id/button_addPlate"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
             android:textSize="50sp"
-            android:minHeight="200sp" />
+            android:longClickable="false" />
 
 
     </LinearLayout>

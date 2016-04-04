@@ -47,4 +47,10 @@ public class HomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
+
+    public void redirectToConfirmPlate(View view) {
+        Log.d(TAG, "Confirm Plate Button Pressed");
+        Intent intent = new Intent(this, ConfirmPlateActivity.class);
+        startActivity(intent);
+    }
 }

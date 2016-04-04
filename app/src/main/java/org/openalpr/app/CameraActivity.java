@@ -89,6 +89,7 @@ public class CameraActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     private String mDateTime = null;
     private String tempFilePath;
+    private long startTime;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -264,6 +265,7 @@ public class CameraActivity extends AppCompatActivity implements
 
         @Override
         protected Void doInBackground(byte[]... data) {
+            startTime = System.currentTimeMillis();
             FileOutputStream fos;
 
             // Write to SD Card
@@ -342,8 +344,6 @@ public class CameraActivity extends AppCompatActivity implements
 
                 refreshGallery(outFile);
 
-//                tempFilePath = outFile.getAbsolutePath();
-
                 /** here is where you need to get the information from exif */
                 getPhotoInfo(tempFilePath);
 
@@ -366,6 +366,9 @@ public class CameraActivity extends AppCompatActivity implements
                 intent.putExtra("picture", tempFilePath);
                 intent.putExtra("latlng", args);
                 Log.d(TAG, "latlng after putExtra " + mLatLng.latitude + ", " + mLatLng.longitude);
+                final long elapsedTimeMillis = System.currentTimeMillis() - startTime;
+                Log.d(TAG, "TOTAL SAVE IMAGE TIME: " + (elapsedTimeMillis/1000) + " seconds");
+
                 CameraActivity.this.startActivity(intent);
 
             } catch (IOException e) {
@@ -529,6 +532,8 @@ public class CameraActivity extends AppCompatActivity implements
     private void handleZoom(MotionEvent event, Camera.Parameters params) {
         int maxZoom = params.getMaxZoom();
         int zoom = params.getZoom();
+        // change newDist to equal the position of the SeekBar
+        // mDist * SeekBar_location (0-1.0)
         float newDist = getFingerSpacing(event);
         if (newDist > mDist) {
             //zoom in
