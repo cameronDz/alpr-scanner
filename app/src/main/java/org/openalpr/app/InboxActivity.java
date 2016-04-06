@@ -13,6 +13,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -22,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,9 +45,11 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private Context context;
 
-//    private ArrayList<messages> messages;
-//
-//    private ArrayAdapter<messages> adapter;
+    private String testJSON = "[{\"mid\": \"0101\" ,\"timestamp\":December212012,\"gps_lon\":.01,\"gps_lat\":.02,\"message\":1},{\"mid\":\"0111\",\"timestamp\":December222012,\"gps_lon\":.05,\"gps_lat\":.12,\"message\":2},{\"mid\":\"08931\",\"timestamp\":December232012,\"gps_lon\":.11,\"gps_lat\":.34,\"message\":4},{\"mid\":\"0321\",\"timestamp\":December242012,\"gps_lon\":.76,\"gps_lat\":.67,\"message\":3}]";
+
+    private ArrayList<MessageItem> messages;
+
+    private ArrayAdapter<MessageItem> adapter;
 
 
     @Override
@@ -53,49 +58,43 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
         setContentView(R.layout.activity_inbox);
         context = this;
 
-//
-//        messages = new ArrayList<messages>;
-//        adapter = new ArrayAdapter<messages>(
-//                this,
-//                R.layout.message_list_item,
-//                R.id.item_text,
-//                messages
-//        );
+        try {
 
+            JSONArray jsonArray = new JSONArray(testJSON);
+            loadMessages(jsonArray);
 
+        } catch(Exception e) {
+            Log.e(TAG, "Exception parsing JSON result", e);
+        }
 
-    // dummy array list of messages for testing
-
-        ArrayList<String> messageList = new ArrayList<>();
-        messageList.add("first");
-        messageList.add("second");
-        messageList.add("third");
-        messageList.add("fourth");
-        messageList.add("fifth");
-        messageList.add("sixth");
-        messageList.add("seven");
-        messageList.add("eight");
-        messageList.add("nine");
-        messageList.add("ten");
-        messageList.add("11");
-        messageList.add("45");
-        messageList.add("6hadk");
-        messageList.add("testing");
-        messageList.add("hello");
-        messageList.add("dog");
-
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                R.layout.message_list_item,
-                R.id.item_text,
-                messageList
-        );
 
         ListView messageListView = (ListView) findViewById(R.id.inbox_list);
         messageListView.setAdapter(adapter);
         messageListView.setOnItemClickListener(this);
 
+    }
+
+    private void loadMessages(JSONArray jsonArray) throws JSONException {
+
+        messages = new ArrayList<MessageItem>();
+        Log.d(TAG, String.valueOf(jsonArray.length()));
+
+
+        for(int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+            Log.d(TAG, String.valueOf(jsonObject.getInt("mid")));
+            Log.d(TAG, jsonObject.getString("message"));
+            Log.d(TAG, jsonObject.getString("timestamp"));
+
+
+        }
+        adapter = new ArrayAdapter<MessageItem>(
+                this,
+                R.layout.message_list_item,
+                R.id.item_text,
+                messages
+        );
     }
 
 
@@ -118,11 +117,57 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
 
     }
 
+    public void redirectToMessageView(View view) {
+        Intent intent = new Intent(context, MessageViewActivity.class);
+        startActivity(intent);
+    }
+
+    public void redirectToMap(View view) {
+        Intent intent = new Intent(context, MapActivity.class);
+        startActivity(intent);
+    }
+
+
+    protected void getMessage(String sMessage, Context context) {
+
+    }
+
+    protected void storeMessage(String sMessage, Context context) {
+        Log.d(TAG, "receiveMessage: " + sMessage);
+
+        // add new line character to the end of the message
+        sMessage = sMessage + "\n";
+        FileOutputStream file;
+        // open file to be written to
+        try {
+            file = context.openFileOutput(Variables.MESSAGE_FILE, Context.MODE_APPEND);
+            // write new message to file
+            try {
+                file.write( sMessage.getBytes() );
+
+                file.close();
+            } catch (IOException e) {
+                Log.d(TAG, "IOException: " + e);
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "FileNotFoundException: " + e);
+            e.printStackTrace();
+        }
+    }
+
+}
+
+
+
+
+
+
 
 //        getView(position, messageListView, parent);
 
 
-        // open the message view
+// open the message view
 //        Intent intent = new Intent(this, MessageViewActivity.class);
 
 //    public View getView (int position, View convertView, ViewGroup parent){
@@ -140,15 +185,3 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
 ////        imageView.setVisibility(View.INVISIBLE);
 //        return convertView;
 //    }
-    public void redirectToMessageView(View view) {
-        Intent intent = new Intent(context, MessageViewActivity.class);
-        startActivity(intent);
-    }
-
-    public void redirectToMap(View view) {
-        Intent intent = new Intent(context, MapActivity.class);
-        startActivity(intent);
-    }
-
-}
-

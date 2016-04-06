@@ -167,6 +167,7 @@ public class LoginActivity extends AppCompatActivity {
             // write new message to file
             try {
                 file.write( sMessage.getBytes() );
+
                 file.close();
             } catch (IOException e) {
                 Log.d(TAG, "IOException: " + e);
