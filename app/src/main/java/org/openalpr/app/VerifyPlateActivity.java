@@ -1,6 +1,8 @@
 package org.openalpr.app;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,10 +14,15 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 /**
  *  Created by Travis
@@ -55,6 +62,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
     private int index;
 
+    private LatLng mLatLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +82,23 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         candiateList = intent.getStringArrayListExtra("candidateList");
         plateArray = intent.getStringArrayExtra("plateList");
         mCurrentPhotoPath = intent.getStringExtra("picture");
+        Bundle bundle = getIntent().getParcelableExtra("latlng");
+        mLatLng = bundle.getParcelable("mlatlng");
+
+        String[] stateNames = getResources().getStringArray(R.array.states);
+        String[] stateAbbreviations = getResources().getStringArray(R.array.states_abbreviated);
+
+        HashMap<String, String> mMap = new HashMap<String, String>();
+
+        for (int i = 0; i < stateNames.length; i++) {
+            mMap.put(stateNames[i], stateAbbreviations[i]);
+        }
+
+        String currentState = latlngToStateString(mLatLng);
+        String currentStateAbbreviated = mMap.get(currentState);
+
+        Log.v(TAG, "LATLNG STATE: " + currentStateAbbreviated);
+
         displayImage();
 
         // spinner for state code
@@ -85,6 +110,11 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
                 android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stateSpinner.setAdapter(adapter);
+
+        if (!currentStateAbbreviated.equals(null)) {
+            int spinnerPosition = adapter.getPosition(currentStateAbbreviated);
+            stateSpinner.setSelection(spinnerPosition);
+        }
 
         //spinner for plate
         plateSpinner = (Spinner) findViewById(R.id.plate_spinner);
@@ -188,5 +218,18 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
+    }
+
+    public String latlngToStateString(LatLng latlng){
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses;
+        String state = "Alabama";
+        try{
+            addresses = geocoder.getFromLocation(latlng.latitude, latlng.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+            state = addresses.get(0).getAdminArea();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return state;
     }
 }

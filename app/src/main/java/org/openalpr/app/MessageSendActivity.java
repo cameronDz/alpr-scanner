@@ -14,6 +14,8 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.IOException;
 
 
@@ -45,6 +47,7 @@ import java.io.IOException;
 public class MessageSendActivity extends AppCompatActivity {
 
     private String TAG = "MessageSendActivity";
+    private LatLng mLatLng;
 
     private Context context;
     // message data
@@ -61,6 +64,8 @@ public class MessageSendActivity extends AppCompatActivity {
     
     protected String time;
 
+    private String mTimeStamp;
+
     private GoogleCloudMessaging gcm = null;
 
 
@@ -76,16 +81,19 @@ public class MessageSendActivity extends AppCompatActivity {
         Intent intent = getIntent();
         state = intent.getStringExtra("state");
         plate = intent.getStringExtra("plate");
+        mTimeStamp = intent.getStringExtra("teimstamp");
+
+        Bundle bundle = intent.getParcelableExtra("latlng");
+        mLatLng = bundle.getParcelable("mlatlng");
         // Get gps coordinates of incident
-        gpsLat = 0;
-        gpsLong = 0;
-        // TODO get real gps coordinates
+        gpsLat = mLatLng.latitude;
+        gpsLong = mLatLng.longitude;
         // get timestamp of incident
-        time = "2/20/2016 9:00:50";
-        // TODO get real timestamp
+        time = mTimeStamp;
 
         Log.d(TAG, "STATE: " + state);
         Log.d(TAG, "PLATE: " + plate);
+        Log.d(TAG, "TIMESTAMP: " + time);
     }
 
     public void sendMessage(View view) {

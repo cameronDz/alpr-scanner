@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,7 +52,6 @@ public class ConfirmPlateActivity extends AppCompatActivity
     private Context context;
     private String plate_state = "";
     protected String plate_number = "";
-    private LatLng mLatLng;
 
     private String[] abrv_state;
 
@@ -73,11 +73,6 @@ public class ConfirmPlateActivity extends AppCompatActivity
         spinner.setOnItemSelectedListener(this);
         // set context, used in sending data to server
         context = this;
-
-        Bundle bundle = getIntent().getParcelableExtra("latlng");
-        mLatLng = bundle.getParcelable("mlatlng");
-
-        Log.v(TAG, "LATLNG STATE: " + latlngToStateString(mLatLng));
 
         Log.v(TAG, "TEST TEST TEST: ");
         Log.v(TAG, "TEST TEST TEST: Variables.username = " + Variables.username);
@@ -141,18 +136,5 @@ public class ConfirmPlateActivity extends AppCompatActivity
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, message, duration);
         toast.show();
-    }
-
-    public String latlngToStateString(LatLng latlng){
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses;
-        String state = "AL";
-        try{
-            addresses = geocoder.getFromLocation(latlng.latitude, latlng.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-            state = addresses.get(0).getAdminArea();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        return state;
     }
 }

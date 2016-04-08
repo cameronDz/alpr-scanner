@@ -67,7 +67,10 @@ public class MessageViewActivity extends AppCompatActivity implements OnMapReady
     public String latlngToAddressString(LatLng latlng){
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         List<Address> addresses;
+
+        // address defaults to (LAT, LON) in case the try clause fails
         String address = "(" + latlng.latitude + ", " + latlng.longitude + ")";
+
         try{
             addresses = geocoder.getFromLocation(latlng.latitude, latlng.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
             String street = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()

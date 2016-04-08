@@ -87,9 +87,7 @@ public class CameraActivity extends AppCompatActivity implements
     private LatLng mLatLng;
     private float mDist = 0;
     private GoogleApiClient mGoogleApiClient;
-    private String mDateTime = null;
-    private String tempFilePath;
-    private long startTime;
+    private String mTimeStamp;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -168,16 +166,6 @@ public class CameraActivity extends AppCompatActivity implements
         public void onPictureTaken(byte[] data, Camera camera) {
             // calls async task to save images without interrupting application
             new SaveImageTask().execute(data);
-
-            /**
-             * will have to move the getting of latitude and longitude to where the intent is for
-             * directing to the next activity so that they can be passes as intent extras to be
-             * available
-             *
-             * the mLatLng variable has a class scope so it can be accessed from anywhere?
-             */
-
-
         }
     };
 
@@ -207,11 +195,11 @@ public class CameraActivity extends AppCompatActivity implements
     public void onConnectionSuspended(int i){
         // code to be run when connection is stopped
     }
+
     @Override
     public void onConnectionFailed(ConnectionResult cr){
         // code to be run when connection fails
     }
-
 
     /** A safe way to get an instance of the Camera object. */
     public static Camera getCameraInstance(){
@@ -265,7 +253,7 @@ public class CameraActivity extends AppCompatActivity implements
 
         @Override
         protected Void doInBackground(byte[]... data) {
-            startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             FileOutputStream fos;
 
             // Write to SD Card
@@ -282,12 +270,13 @@ public class CameraActivity extends AppCompatActivity implements
                  *    timeStamp -> "MM/DD/YYYY"
                  *    format -> jpg
                  *    */
-                String fileName = String.format("%d", System.currentTimeMillis());
-                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
-                String format = ".jpg";
-                File outFile = new File(dir, timeStamp + "_" + fileName + format);
 
-                tempFilePath = outFile.getAbsolutePath();
+                String fileName = String.format("%d", System.currentTimeMillis());
+                mTimeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
+                String format = ".jpg";
+                File outFile = new File(dir, mTimeStamp + "_" + fileName + format);
+
+                String tempFilePath = outFile.getAbsolutePath();
 
                 Bitmap bmp = BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
 
@@ -344,7 +333,7 @@ public class CameraActivity extends AppCompatActivity implements
 
                 refreshGallery(outFile);
 
-                /** here is where you need to get the information from exif */
+                /** having issues getting the information from exif */
                 getPhotoInfo(tempFilePath);
 
                 if(mLatLng != null && mLatLng_Exif == null) {
@@ -365,6 +354,7 @@ public class CameraActivity extends AppCompatActivity implements
                 Intent intent = new Intent(context, ScanPlate.class);
                 intent.putExtra("picture", tempFilePath);
                 intent.putExtra("latlng", args);
+                intent.putExtra("timestamp", mTimeStamp);
                 Log.d(TAG, "latlng after putExtra " + mLatLng.latitude + ", " + mLatLng.longitude);
                 final long elapsedTimeMillis = System.currentTimeMillis() - startTime;
                 Log.d(TAG, "TOTAL SAVE IMAGE TIME: " + (elapsedTimeMillis/1000) + " seconds");
@@ -532,8 +522,10 @@ public class CameraActivity extends AppCompatActivity implements
     private void handleZoom(MotionEvent event, Camera.Parameters params) {
         int maxZoom = params.getMaxZoom();
         int zoom = params.getZoom();
+
         // change newDist to equal the position of the SeekBar
         // mDist * SeekBar_location (0-1.0)
+
         float newDist = getFingerSpacing(event);
         if (newDist > mDist) {
             //zoom in
@@ -629,7 +621,7 @@ public class CameraActivity extends AppCompatActivity implements
             String attr_latitude = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
             String attr_latitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
             String attr_longitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
-            mDateTime = ex.getAttribute(ExifInterface.TAG_DATETIME);
+            mTimeStamp = ex.getAttribute(ExifInterface.TAG_DATETIME);
 
 
 
@@ -654,7 +646,7 @@ public class CameraActivity extends AppCompatActivity implements
 
                 mLatLng_Exif = new LatLng(lat, lon);
                 Log.d(TAG, "GPS FROM PHOTO: " + mLatLng_Exif.toString());
-                Log.d(TAG, "DATETIME FROM PHOTO: " + mDateTime);
+                Log.d(TAG, "DATETIME FROM PHOTO: " + mTimeStamp);
             }
             else{
                 Log.d(TAG, "Photo Exif data appears to be null.");
