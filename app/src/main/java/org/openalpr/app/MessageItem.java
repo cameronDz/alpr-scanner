@@ -12,6 +12,8 @@ public class MessageItem implements Serializable {
     private String gpsLon;
     private String gpsLat;
     private String message;
+    private boolean read;
+    private boolean replied;
 
     public MessageItem() {}
 
@@ -35,4 +37,37 @@ public class MessageItem implements Serializable {
 
     public String getMessage() { return message;}
 
+    public void setReadFalse() {
+        this.read = false;
+    }
+
+    public void setReadTrue() {
+        this.read = true;
+    }
+
+    public boolean getReadStatus() { return this.read; }
+
+    public boolean getReplyStatus() { return this.replied; }
+
+    public void setReplyTrue() {
+        this.replied = true;
+    }
+
+    public void setReplyFalse() {
+        this.replied = false;
+    }
+
+    public String messageToString() {
+        String stringMessageItem;
+
+        stringMessageItem = "{\"mid\":\""         + this.getMid()       + "\"," +
+                "\"timestamp\":\""   + this.getTimestamp() + "\"," +
+                "\"gps_lon\":\""     + this.getGpsLon()    + "\"," +
+                "\"gps_lat\":\""     + this.getGpsLat()    + "\"," +
+                "\"message\":\""     + this.getMessage()   + "\"," +
+                "\"read\":\""        + this.getReadStatus()+ "\"," +
+                "\"replied\":\""    + this.getReplyStatus()+ "\"}";
+
+        return stringMessageItem;
+    }
 }
