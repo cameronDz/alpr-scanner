@@ -8,7 +8,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/img_message"
         android:layout_gravity="center_horizontal"
-        android:src="@drawable/mad"
         android:contentDescription="message_icon"
         android:layout_marginTop="20sp"
         android:layout_marginBottom="5sp" />

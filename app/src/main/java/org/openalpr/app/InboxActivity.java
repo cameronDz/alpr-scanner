@@ -42,6 +42,13 @@ import java.util.List;
  *
  * TO DO:
  *  - add CustomView for messages
+ *
+ *  Edit by Travis Moretz on 4/9/19
+ *
+ *  Gets messages from file on device
+ *  Parses them into messageItem objects and displays on screen in custom listView with newest to top.
+ *  Users can view message on map by clicking the message item or delete the message by clicking
+ *  the delete button.  Will update the file if messages are deleted and rewrite file
  */
 
 public class InboxActivity extends AppCompatActivity {
@@ -58,9 +65,9 @@ public class InboxActivity extends AppCompatActivity {
 
     // Messages for testing
 
-    private String test1 = "{\"mid\": \"0101\",\"timestamp\":\"December 21, 2012\",\"gps_lon\":\".01\",\"gps_lat\":\".02\",\"message\":\"1\"}";
+    private String test1 = "{\"mid\": \"0101\",\"timestamp\":\"December 21, 2012\",\"gps_lon\":\"-72.515108\",\"gps_lat\":\"41.793851\",\"message\":\"1\"}";
 
-    private String test2 = "{\"mid\":\"0111\",\"timestamp\":\"December 22, 2012\",\"gps_lon\":\".05\",\"gps_lat\":\".12\",\"message\":\"2\"}";
+    private String test2 = "{\"mid\":\"0111\",\"timestamp\":\"December 22, 2012\",\"gps_lon\":\"-72.76655\",\"gps_lat\":\"41.690668\",\"message\":\"2\"}";
 
     private String test3 = "{\"mid\":\"08931\",\"timestamp\":\"December 23, 2012\",\"gps_lon\":\".11\",\"gps_lat\":\".34\",\"message\":\"3\"}";
 
@@ -95,7 +102,7 @@ public class InboxActivity extends AppCompatActivity {
 
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "In onStart");
+//        Log.d(TAG, "In onStart");
 
         // Get the arrayList of strings saved to file
         messageStringList = Variables.messages(context);
@@ -113,7 +120,7 @@ public class InboxActivity extends AppCompatActivity {
 
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "In onStop");
+//        Log.d(TAG, "In onStop");
         reverseAndSaveMessages();
         Log.d(TAG, "messagesSize Before: " + messages.size());
         messages.clear();
@@ -126,7 +133,7 @@ public class InboxActivity extends AppCompatActivity {
 
     // Click handler for touching message item
     private void registerClickCallback() {
-        Log.d(TAG, "In registerClickCallBack");
+ //       Log.d(TAG, "In registerClickCallBack");
         ListView listView = (ListView) findViewById(R.id.inbox_list);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -145,7 +152,7 @@ public class InboxActivity extends AppCompatActivity {
 
     // set up for filling screen
     private void populateListView() {
-        Log.d(TAG, "In populateView");
+ //       Log.d(TAG, "In populateView");
         adapter = new MyListAdaptor();
         ListView listView = (ListView) findViewById(R.id.inbox_list);
         listView.setAdapter(adapter);
@@ -160,7 +167,7 @@ public class InboxActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent ) {
-            Log.d(TAG, "In getView");
+//            Log.d(TAG, "In getView");
             final int index = position;
             // get the message
             MessageItem currentMessageItem = messages.get(position);
@@ -177,7 +184,7 @@ public class InboxActivity extends AppCompatActivity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(getContext(), "delete #: " + index, Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getContext(), "delete #: " + index, Toast.LENGTH_SHORT).show();
                     messages.remove(index);
                     adapter.notifyDataSetChanged();
                 }
@@ -219,7 +226,7 @@ public class InboxActivity extends AppCompatActivity {
 
     // fill the arraylist for view
     private void loadMessages(ArrayList<String> messageStringList) {
-        Log.d(TAG, "In loadMessages");
+  //      Log.d(TAG, "In loadMessages");
 
         for(int i = 0; i < messageStringList.size(); i++) {
 //            Log.d(TAG, "MESS " + i + ": " + messageStringList.get(i).toString());
@@ -262,10 +269,20 @@ public class InboxActivity extends AppCompatActivity {
 
     public void redirectToMessageView(View view, MessageItem clickedMessage) {
         Intent intent = new Intent(context, MessageViewActivity.class);
-    //    intent.putStringArrayListExtra("messageItem", clickedMessage);
+
+        // a parcelable version of clickedMessage to send to message view
+        intent.putExtra("messageItem", clickedMessage);
+
         startActivity(intent);
     }
 
+
+    /**
+     * TODO
+     *
+     * Make a function that passes all messages to map and pins them all
+     * @param view
+     */
     public void redirectToMap(View view) {
         Intent intent = new Intent(context, MapActivity.class);
         startActivity(intent);
@@ -274,7 +291,7 @@ public class InboxActivity extends AppCompatActivity {
     // When saving messages they need to be reversed in to be put back in file, because
     // new messages will be appended to file when they are sent from server
     public void reverseAndSaveMessages() {
-        Log.d(TAG, "In reverseAndSaveMessages");
+  //      Log.d(TAG, "In reverseAndSaveMessages");
 
         // reverse the order - because the file has new messages appended to end
         Collections.reverse(messages);
@@ -356,7 +373,7 @@ public class InboxActivity extends AppCompatActivity {
      *         s[4] = message = actually message that was sent
      */
     protected static String[] messBreakDown(String message) {
-        Log.d(TAG, "In messBreakDown");
+   //     Log.d(TAG, "In messBreakDown");
      //   Log.d(TAG, "messageBreakDown: " + message);
         String[] s = new String[5];
 

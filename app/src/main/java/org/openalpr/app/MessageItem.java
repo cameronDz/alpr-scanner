@@ -1,11 +1,15 @@
 package org.openalpr.app;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+
 import java.io.Serializable;
 
 /**
  * Created by Travis on 4/6/16.
  */
-public class MessageItem implements Serializable {
+public class MessageItem implements Parcelable {
 
     private String mid;
     private String timestamp;
@@ -16,6 +20,26 @@ public class MessageItem implements Serializable {
     private boolean replied;
 
     public MessageItem() {}
+
+    public MessageItem(Parcel input) {
+        mid = input.readString();
+        timestamp = input.readString();
+        gpsLon = input.readString();
+        gpsLat = input.readString();
+        message = input.readString();
+
+        if (input.readInt() == 0) {
+            read = false;
+        } else {
+            read = true;
+        }
+
+        if (input.readInt() == 0) {
+            replied = false;
+        } else {
+            replied = true;
+        }
+    }
 
     public void setMid(String mid) {this.mid = mid;}
 
@@ -70,4 +94,48 @@ public class MessageItem implements Serializable {
 
         return stringMessageItem;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+        // these must be retrieved in same order else the wrong value will be retrieved
+
+        dest.writeString(mid);
+        dest.writeString(timestamp);
+        dest.writeString(gpsLon);
+        dest.writeString(gpsLat);
+        dest.writeString(message);
+
+        // No method for writing boolean will have to find value and send int
+        if(getReadStatus() == false ) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+        }
+
+        if(getReplyStatus() == false) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+        }
+
+    }
+
+    public static final Parcelable.Creator<MessageItem> CREATOR
+            = new Parcelable.Creator<MessageItem>() {
+        public MessageItem createFromParcel(Parcel in) {
+            Log.d("create parcel", "message item");
+
+            return new MessageItem(in);
+        }
+
+        public MessageItem[] newArray(int size) {
+            return new MessageItem[size];
+        }
+    };
 }
