@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.openalpr.app.AppConstants.*;
@@ -78,6 +81,10 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
 
     private List<AlprCandidate> candList;
 
+    private LatLng mLatLng;
+
+    private String mTimeStamp;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +113,10 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         mImageView = (ImageView) findViewById(R.id.imageView);
         Intent intent = getIntent();
         mCurrentPhotoPath = intent.getStringExtra("picture");
+        mTimeStamp = intent.getStringExtra("timestamp");
+        Bundle bundle = intent.getParcelableExtra("latlng");
+        mLatLng = bundle.getParcelable("mlatlng");
+        Log.d(TAG, "latlng after parsing " + mLatLng.latitude + ", "+ mLatLng.longitude);
 
 
         handleBigCameraPhoto();
@@ -251,6 +262,11 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         intent.putExtra("recognized", alprResult.isRecognized());
         intent.putExtra("plateList", plateArray);
         intent.putStringArrayListExtra("candidateList", candidateList);
+        intent.putExtra("timestamp", mTimeStamp);
+
+        Bundle args = new Bundle();
+        args.putParcelable("mlatlng", mLatLng);
+        intent.putExtra("latlng", args);
         progressDialog.dismiss();
         startActivity(intent);
 

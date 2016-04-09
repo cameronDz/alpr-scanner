@@ -3,11 +3,17 @@ package org.openalpr.app;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by Anthony Brignano on 2/19/16.
@@ -75,6 +81,11 @@ public class RegisterActivity extends AppCompatActivity {
         if(passCheck){
             Log.d(TAG, "passCheck: true");
 
+            // encrypt password here
+            password = Integer.toString(password.hashCode());
+            Log.d(TAG, "Username " + username);
+            Log.d(TAG, "Password " + password);
+
             // save user name and password to be verified for global variables
             Variables.username = username;
             Variables.password = password;
@@ -86,4 +97,5 @@ public class RegisterActivity extends AppCompatActivity {
             HTTPService.sendData(context, view, 1);
         }
     }
+
 }

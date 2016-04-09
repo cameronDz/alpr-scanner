@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -15,6 +16,9 @@ import com.google.android.gms.iid.InstanceID;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by Anthony Brignano on 2/17/16.
@@ -104,7 +108,10 @@ public class LoginActivity extends AppCompatActivity {
         EditText u = (EditText) findViewById(R.id.username);
         EditText p = (EditText) findViewById(R.id.password);
         String username = u.getText().toString();
-        String password = p.getText().toString();
+        String password = Integer.toString(p.getText().toString().hashCode());
+
+        // encrypt password here
+
         // set global username
         Variables.username = username;
         Variables.password = password;
@@ -149,6 +156,7 @@ public class LoginActivity extends AppCompatActivity {
 
         startActivity(scanIntent);
     }
+
     /**
      * TESTING!!!!
      * Will be how a message is broken down and saved on a device
