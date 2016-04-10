@@ -19,7 +19,6 @@ import java.io.IOException;
  * Listens for notifications sent to device from GCM.
  */
 public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerService {
-
     protected String TAG = "GcmListenerService";
 
     @Override
