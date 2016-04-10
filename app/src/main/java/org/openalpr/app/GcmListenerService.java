@@ -34,6 +34,7 @@ public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerSe
 
         // convert bundle data into json string format
         String toJSON = convertJson(mid, timestamp, gpsLon,gpsLat, message);
+        Log.d(TAG, "toJSON: " + toJSON);
 
         // Use method that stores messages to a file.
         // TODO make sure this is storing
@@ -50,6 +51,7 @@ public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerSe
      * @param message GCM message received.
      */
     private void sendNotification(String message) {
+        Log.d(TAG, "sendNotification");
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
