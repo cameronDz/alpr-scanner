@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,29 +22,38 @@ import java.io.IOException;
  * Listens for notifications sent to device from GCM.
  */
 public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerService {
-
     protected String TAG = "GcmListenerService";
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
         Log.d(TAG, "onMessageReceived");
         // get messages from GCM bundle
-        String mid = data.getString("mid");
-        String timestamp = data.getString("timestamp");
-        String gpsLon = data.getString("gpsLon");
-        String gpsLat = data.getString("gpsLat");
-        String message = data.getString("message");
+        String bMessage = data.getString("message");
 
         // convert bundle data into json string format
-        String toJSON = convertJson(mid, timestamp, gpsLon,gpsLat, message);
+        Log.d(TAG, "toJSON: " + bMessage);
+        String sMessage = "";
+        try {
+            // create JSONObject from GCM Bundle
+            JSONObject jMessage = new JSONObject(bMessage);
+            // create String representation of JSONObject of message to be stored
+            sMessage = convertJson(jMessage.get("mid").toString(), jMessage.get("timestamp").toString(),
+                    jMessage.get("gpsLon").toString(), jMessage.get("gpsLat").toString(),
+                    jMessage.get("message").toString() );
+            Log.d(TAG, "convertJson: " + sMessage);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d(TAG, "JSONException: " + e);
+        }
+
 
         // Use method that stores messages to a file.
         // TODO make sure this is storing
-        storeMessage(toJSON, this);
+        storeMessage(sMessage, this);
 
         // display notification
         // TODO make sure notification is working
-        sendNotification(message);
+        sendNotification(sMessage);
     }
 
     /**
@@ -50,6 +62,7 @@ public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerSe
      * @param message GCM message received.
      */
     private void sendNotification(String message) {
+        Log.d(TAG, "sendNotification");
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
@@ -87,6 +100,7 @@ public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerSe
             try {
                 file.write( sMessage.getBytes() );
                 file.close();
+                Log.d(TAG, "storeMessage: file.close();");
             } catch (IOException e) {
                 Log.d(TAG, "IOException: " + e);
                 e.printStackTrace();

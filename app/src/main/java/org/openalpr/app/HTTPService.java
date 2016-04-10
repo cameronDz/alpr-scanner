@@ -64,25 +64,22 @@ public class HTTPService {
                             Log.d(TAG, "onErrorResponse: " + error.getMessage());
 
                             // popup Strings for user
-                            String message = "", confirm = "Re-Try.";
+                            String message = "There was an onErrorResponse: ", confirm = "Re-Try.";
                             // check for server timeout error
                             if (error.networkResponse == null) {
                                 if (error.getClass().equals(TimeoutError.class)) {
-                                    Log.d(TAG, "Response Error: server timeout");
+                                    Log.d(TAG, "onErrorResponse: server timeout");
                                     // set message to user
-                                    message = "There may be a problem with the " +
-                                            "server. Press Re-Try to reattempt to " +
-                                            actString(activity) + ".";
+                                    message = message + "type TimeoutError. ";
                                 }
                             } else {
-                                Log.d(TAG, "Error: internet connection problem");
+                                Log.d(TAG, "onErrorResponse: Unknown");
                                 // set message to user
-                                message = "There may be a problem with your " +
-                                        "internet. Please check your connection to " +
-                                        "the internet and press Re-Try to reattempt " +
-                                        "to " + actString(activity) + ".";
+                                message = message + "type Unknown. ";
                             }
                             //display popup to user
+                            message = message + "Press Re-Try to reattempt to " +
+                                      actString(activity) + ".";
                             userPopUp(message, confirm, context, activity, false);
                             // turn button back on after error
                             view.setClickable(true);
@@ -157,8 +154,7 @@ public class HTTPService {
             if( jResponse.has("output") ) {
                 Log.d(TAG, "interpretResponse() = output");
 
-                // get output message, assign confirm message, and set popup boolean to true
-                String output = jResponse.get("output").toString();
+                // assign confirm message and set popup boolean to true
                 pass = true;
                 confirm = "Continue";
 
@@ -168,26 +164,24 @@ public class HTTPService {
                     Variables.user_id = (Integer) jResponse.get("user_id");
                     // set pop up message
                     message = "You have registered the name: " + Variables.username +
-                            ". Press Continue to register a plate. " + output;
+                            ". Press Continue to register a plate.";
                 } else if( activity == PLATE ) {
                     // set popup message
                     message = "The plate: " + Variables.user_plate + " has been " +
                             "register to user: "+ Variables.username + " successfully. " +
-                            "Press Continue to access your home screen. " + output;
+                            "Press Continue to access your home screen.";
                 } else if( activity == LOGIN ) {
-                    // TODO add user_id to response json to put in variables class
-                    // TODO currently throws error
                     // store user id response from server
-                    //Variables.user_id = (Integer) jResponse.get("user_id");
+                    Variables.user_id = (Integer) jResponse.get("user_id");
                     // set popup message
                     message = "Log in successful. Press Continue to access your " +
-                    "account. " + output;
+                    "account.";
                 } else if( activity == MESSAGE ) {
                     // set popup message
                     message = "The message: " + Variables.message + " has been " +
                             "sent to plate: "+ Variables.plate_to + Variables.state_to +
                             " successfully. Press Continue to return to your " +
-                            "your home screen. " + output;
+                            "your home screen.";
                     // clear all message data
                     Variables.message = "";
                     Variables.plate_to = "";
@@ -198,11 +192,11 @@ public class HTTPService {
                 } else if( activity == READ ) {
                     // TODO add functionality to this
                     message = "Server acknowledges you read your latest message. " +
-                            "Press Continue to return to your home screen" + output;
+                            "Press Continue to return to your home screen.";
                 } else if( activity == REPLY ) {
                     // TODO add functionality to this
                     message = "Server acknowledges you replied to your latest message. " +
-                            "Press Continue to return to your home screen" + output;
+                            "Press Continue to return to your home screen.";
                 }
             } else {
                 Log.d(TAG, "interpretResponse() = error: " + jResponse.toString());
@@ -212,9 +206,9 @@ public class HTTPService {
                 if ( jResponse.has("error") ) {
                     // get error from JSON
                     error = jResponse.get("error").toString();
-                    Log.d(TAG, "interpretResponse() = JSON error message: " + error);
                 }
                 // set popup message
+                Log.d(TAG, "interpretResponse() = JSON error message: " + error);
                 message = "An error has occurred: " + error + ". " +
                         "Press Re-Try to reattempt to " + actString(activity) + ".";
             }
@@ -240,7 +234,7 @@ public class HTTPService {
      * @param act integer representation of the activity data is being analyzed from
      * @param pass boolean telling whether method should send to next activity or not
      */
-    private static void userPopUp(String message, String confirm, final Context context, final int act, final boolean pass) {
+    protected static void userPopUp(String message, String confirm, final Context context, final int act, final boolean pass) {
         Log.d(TAG, "userPopUp");
 
         // create a popup to be displayed to user, describes how data was responded to by server
