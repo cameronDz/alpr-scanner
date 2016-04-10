@@ -58,7 +58,7 @@ public class MessageSendActivity extends AppCompatActivity {
     
     protected String message;
 
-    protected double gpsLong;
+    protected double gpsLon;
     
     protected double gpsLat;
     
@@ -81,13 +81,16 @@ public class MessageSendActivity extends AppCompatActivity {
         Intent intent = getIntent();
         state = intent.getStringExtra("state");
         plate = intent.getStringExtra("plate");
-        mTimeStamp = intent.getStringExtra("teimstamp");
+        mTimeStamp = intent.getStringExtra("timestamp");
 
         Bundle bundle = intent.getParcelableExtra("latlng");
         mLatLng = bundle.getParcelable("mlatlng");
         // Get gps coordinates of incident
-        gpsLat = mLatLng.latitude;
-        gpsLong = mLatLng.longitude;
+        if(mLatLng != null){
+            gpsLat = mLatLng.latitude;
+            gpsLon = mLatLng.longitude;
+        }
+        Log.d(TAG, "GPS IN MESSAGE SEND: (" + gpsLat + ", " + gpsLon + ")");
         // get timestamp of incident
         time = mTimeStamp;
 
@@ -108,7 +111,7 @@ public class MessageSendActivity extends AppCompatActivity {
         Variables.message = message;
         Variables.time = time;
         Variables.gps_lat = gpsLat;
-        Variables.gps_long = gpsLong;
+        Variables.gps_long = gpsLon;
 
         // displays message to user
         int duration = Toast.LENGTH_SHORT;

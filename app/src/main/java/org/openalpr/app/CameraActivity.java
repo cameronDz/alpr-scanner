@@ -355,9 +355,8 @@ public class CameraActivity extends AppCompatActivity implements
                 intent.putExtra("picture", tempFilePath);
                 intent.putExtra("latlng", args);
                 intent.putExtra("timestamp", mTimeStamp);
-                Log.d(TAG, "latlng after putExtra " + mLatLng.latitude + ", " + mLatLng.longitude);
                 final long elapsedTimeMillis = System.currentTimeMillis() - startTime;
-                Log.d(TAG, "TOTAL SAVE IMAGE TIME: " + (elapsedTimeMillis/1000) + " seconds");
+                Log.d(TAG, "TOTAL SAVE IMAGE TIME: " + elapsedTimeMillis + " ms");
 
                 CameraActivity.this.startActivity(intent);
 

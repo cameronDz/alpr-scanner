@@ -116,7 +116,7 @@ public class ScanPlate extends Activity implements AsyncListener<AlprResult> {
         mTimeStamp = intent.getStringExtra("timestamp");
         Bundle bundle = intent.getParcelableExtra("latlng");
         mLatLng = bundle.getParcelable("mlatlng");
-        Log.d(TAG, "latlng after parsing " + mLatLng.latitude + ", "+ mLatLng.longitude);
+        Log.d(TAG, "latlng: " + mLatLng.latitude + ", "+ mLatLng.longitude);
 
 
         handleBigCameraPhoto();

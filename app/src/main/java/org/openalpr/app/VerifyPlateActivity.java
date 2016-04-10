@@ -85,6 +85,10 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         Bundle bundle = getIntent().getParcelableExtra("latlng");
         mLatLng = bundle.getParcelable("mlatlng");
 
+        if(mLatLng != null){
+            Log.d(TAG, "latlng: (" + mLatLng.latitude + ", " + mLatLng.longitude + ")");
+        }
+
         String[] stateNames = getResources().getStringArray(R.array.states);
         String[] stateAbbreviations = getResources().getStringArray(R.array.states_abbreviated);
 
@@ -96,8 +100,6 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
         String currentState = latlngToStateString(mLatLng);
         String currentStateAbbreviated = mMap.get(currentState);
-
-        Log.v(TAG, "LATLNG STATE: " + currentStateAbbreviated);
 
         displayImage();
 
@@ -194,6 +196,11 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         Intent intent = new Intent(this, MessageSendActivity.class);
         intent.putExtra("plate", textView.getText().toString());
         intent.putExtra("state", state);
+        Bundle args = new Bundle();
+        args.putParcelable("mlatlng", mLatLng);
+
+        intent.putExtra("latlng", args);
+
         startActivity(intent);
     }
 
