@@ -7,6 +7,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -72,6 +75,7 @@
         <!-- android:screenOrientation="portrait"/> -->
         <activity android:name=".MessageSendActivity" />
         <!-- android:screenOrientation="portrait"/> -->
+
         <activity android:name=".ConfirmPlateActivity" />
         <activity android:name=".HomeActivity" />
         <activity android:name=".InboxActivity">
@@ -86,6 +90,13 @@
              ATTENTION: This was auto-generated to add Google Play services to your project for
              App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
         -->
+<!--        <activity android:name=".MessageViewActivity" />-->
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBy7x9tB9bu1-GLJRAv0uM4AF6RSLMqjdE"/>
+        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

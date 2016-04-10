@@ -13,10 +13,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -119,14 +117,13 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
         imageView.setVisibility(View.INVISIBLE);
 
     }
-}
+
 
 //        getView(position, messageListView, parent);
 
 
         // open the message view
 //        Intent intent = new Intent(this, MessageViewActivity.class);
-
 
 //    public View getView (int position, View convertView, ViewGroup parent){
 //
@@ -143,3 +140,15 @@ public class InboxActivity extends AppCompatActivity implements AdapterView.OnIt
 ////        imageView.setVisibility(View.INVISIBLE);
 //        return convertView;
 //    }
+    public void redirectToMessageView(View view) {
+        Intent intent = new Intent(context, MessageViewActivity.class);
+        startActivity(intent);
+    }
+
+    public void redirectToMap(View view) {
+        Intent intent = new Intent(context, MapActivity.class);
+        startActivity(intent);
+    }
+
+}
+
