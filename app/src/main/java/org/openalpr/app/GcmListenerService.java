@@ -39,7 +39,7 @@ public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerSe
             // create String representation of JSONObject of message to be stored
             sMessage = convertJson(jMessage.get("message_id").toString(), jMessage.get("timestamp").toString(),
                     jMessage.get("gps_lon").toString(), jMessage.get("gps_lat").toString(),
-                    jMessage.get("message").toString() );
+                    jMessage.get("message").toString());
             Log.d(TAG, "convertJson: " + sMessage);
         } catch (JSONException e) {
             e.printStackTrace();
