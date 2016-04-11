@@ -171,7 +171,8 @@ public class LoginActivity extends AppCompatActivity {
         FileOutputStream file;
         // open file to be written to
         try {
-            file = context.openFileOutput(Variables.MESSAGE_FILE, Context.MODE_APPEND);
+            file = context.openFileOutput(Variables.MESSAGE_FILE, Context.MODE_PRIVATE);
+//            file = context.openFileOutput(Variables.MESSAGE_FILE, Context.MODE_APPEND);
             // write new message to file
             try {
                 file.write( sMessage.getBytes() );

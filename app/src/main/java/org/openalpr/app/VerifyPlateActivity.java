@@ -197,7 +197,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         TextView textView = (TextView) findViewById(R.id.plateTextView);
 
         Intent intent = new Intent(this, MessageSendActivity.class);
-        intent.putExtra("plate", textView.getText().toString());
+        intent.putExtra("plate", textView.getText().toString().toUpperCase());
         intent.putExtra("state", state);
         intent.putExtra("timestamp", mTimeStamp);
         Bundle args = new Bundle();

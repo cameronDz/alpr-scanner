@@ -92,7 +92,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
     public void confirmPlate(View view) {
         Log.d(TAG, "ConfirmPlate Button Pressed");
         EditText p = (EditText) findViewById(R.id.plate_number);
-        plate_number = p.getText().toString();
+        plate_number = p.getText().toString().toUpperCase();
 
         // store user selected plate/state in global variables
         Variables.user_plate = this.plate_number;
