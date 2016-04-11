@@ -271,7 +271,7 @@ public class CameraActivity extends AppCompatActivity implements
                  *    */
 
                 String fileName = String.format("%d", System.currentTimeMillis());
-                mTimeStamp = new SimpleDateFormat("MMddyyyy_HHmmss", Locale.ENGLISH).format(new Date());
+                mTimeStamp = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a z", Locale.ENGLISH).format(new Date());
                 String format = ".jpg";
                 Log.d(TAG, mTimeStamp);
                 File outFile = new File(dir, mTimeStamp + "_" + fileName + format);
