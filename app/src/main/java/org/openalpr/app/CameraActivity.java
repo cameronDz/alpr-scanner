@@ -271,7 +271,7 @@ public class CameraActivity extends AppCompatActivity implements
                  *    */
 
                 String fileName = String.format("%d", System.currentTimeMillis());
-                mTimeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
+                mTimeStamp = new SimpleDateFormat("MMddyyyy_HHmmss", Locale.ENGLISH).format(new Date());
                 String format = ".jpg";
                 File outFile = new File(dir, mTimeStamp + "_" + fileName + format);
 
@@ -585,7 +585,7 @@ public class CameraActivity extends AppCompatActivity implements
             String attr_latitude = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
             String attr_latitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
             String attr_longitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
-            mTimeStamp = ex.getAttribute(ExifInterface.TAG_DATETIME);
+//            mTimeStamp = ex.getAttribute(ExifInterface.TAG_DATETIME);
 
 
 

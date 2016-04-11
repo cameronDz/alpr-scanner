@@ -90,7 +90,7 @@ public class MessageSendActivity extends AppCompatActivity {
             gpsLat = mLatLng.latitude;
             gpsLon = mLatLng.longitude;
         }
-        Log.d(TAG, "GPS IN MESSAGE SEND: (" + gpsLat + ", " + gpsLon + ")");
+        Log.d(TAG, "GPS LOCATION: (" + gpsLat + ", " + gpsLon + ")");
         // get timestamp of incident
         time = mTimeStamp;
 

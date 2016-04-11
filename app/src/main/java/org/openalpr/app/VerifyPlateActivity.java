@@ -64,6 +64,8 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
     private LatLng mLatLng;
 
+    private String mTimeStamp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +85,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         plateArray = intent.getStringArrayExtra("plateList");
         mCurrentPhotoPath = intent.getStringExtra("picture");
         Bundle bundle = getIntent().getParcelableExtra("latlng");
+        mTimeStamp = intent.getStringExtra("timestamp");
         mLatLng = bundle.getParcelable("mlatlng");
 
         if(mLatLng != null){
@@ -196,6 +199,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         Intent intent = new Intent(this, MessageSendActivity.class);
         intent.putExtra("plate", textView.getText().toString());
         intent.putExtra("state", state);
+        intent.putExtra("timestamp", mTimeStamp);
         Bundle args = new Bundle();
         args.putParcelable("mlatlng", mLatLng);
 
@@ -222,7 +226,6 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
      */
 
     public void takePicture(View view) {
-
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
