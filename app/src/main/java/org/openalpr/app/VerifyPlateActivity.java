@@ -64,6 +64,8 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
     private LatLng mLatLng;
 
+    private String mTimeStamp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +85,12 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         plateArray = intent.getStringArrayExtra("plateList");
         mCurrentPhotoPath = intent.getStringExtra("picture");
         Bundle bundle = getIntent().getParcelableExtra("latlng");
+        mTimeStamp = intent.getStringExtra("timestamp");
         mLatLng = bundle.getParcelable("mlatlng");
+
+        if(mLatLng != null){
+            Log.d(TAG, "latlng: (" + mLatLng.latitude + ", " + mLatLng.longitude + ")");
+        }
 
         String[] stateNames = getResources().getStringArray(R.array.states);
         String[] stateAbbreviations = getResources().getStringArray(R.array.states_abbreviated);
@@ -96,8 +103,6 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
         String currentState = latlngToStateString(mLatLng);
         String currentStateAbbreviated = mMap.get(currentState);
-
-        Log.v(TAG, "LATLNG STATE: " + currentStateAbbreviated);
 
         displayImage();
 
@@ -194,6 +199,12 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         Intent intent = new Intent(this, MessageSendActivity.class);
         intent.putExtra("plate", textView.getText().toString());
         intent.putExtra("state", state);
+        intent.putExtra("timestamp", mTimeStamp);
+        Bundle args = new Bundle();
+        args.putParcelable("mlatlng", mLatLng);
+
+        intent.putExtra("latlng", args);
+
         startActivity(intent);
     }
 
@@ -215,7 +226,6 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
      */
 
     public void takePicture(View view) {
-
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
