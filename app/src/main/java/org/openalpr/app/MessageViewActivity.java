@@ -5,6 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -64,7 +65,6 @@ public class MessageViewActivity extends AppCompatActivity implements OnMapReady
 
         TextView datetime_text =(TextView)findViewById(R.id.text_datetime);
         TextView location_text =(TextView)findViewById(R.id.text_location);
-        ImageView img_message =(ImageView)findViewById(R.id.img_message);
 //        String datetime = new SimpleDateFormat("EEE, MMM dd, ''yy 'at' hh:mm:ss a", Locale.ENGLISH).format(new Date());
 
         // Set the time values from message
@@ -72,11 +72,13 @@ public class MessageViewActivity extends AppCompatActivity implements OnMapReady
         String gpsLon = messageItem.getGpsLon();
         String gpsLat = messageItem.getGpsLat();
         datetime_text.setText(datetime);
-        location_text.setText(gpsLon + ", " + gpsLat);
+        location_text.setText(latlngToAddressString(new LatLng(Double.parseDouble(gpsLat), Double.parseDouble(gpsLon))));
 
         // to set the correct message image
         // fill the view with correct image
         ImageView imageView = (ImageView) findViewById(R.id.img_message);
+
+        Log.d(TAG, "Message: " + messageItem.getMessage());
 
         switch (messageItem.getMessage()) {
             case "1":
