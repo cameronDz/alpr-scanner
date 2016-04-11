@@ -90,26 +90,31 @@ public class InboxActivity extends AppCompatActivity {
         setContentView(R.layout.activity_inbox);
         context = this;
         Log.d(TAG, "In onCreate");
+//        deleteFile(Variables.MESSAGE_FILE);
 //        storeMessage(test1, this.context);
 //        storeMessage(test2, this.context);
 //        storeMessage(test3, this.context);
 //        storeMessage(test4, this.context);
 //        storeMessage(test5, this.context);
 //        storeMessage(test6, this.context);
+//        clearAndStoreMessage(test1, this.context);
 
 
     }
 
     protected void onStart() {
         super.onStart();
-//        Log.d(TAG, "In onStart");
+        Log.d(TAG, "In onStart");
 
         // Get the arrayList of strings saved to file
         messageStringList = Variables.messages(context);
 
+        Log.d(TAG, "message list size = " + messageStringList.size());
+
         // create arrayList of message objects from the strings
         messages = new ArrayList<MessageItem>();
         loadMessages(messageStringList);
+
 
         // load them on the screen
         populateListView();
@@ -118,8 +123,8 @@ public class InboxActivity extends AppCompatActivity {
         registerClickCallback();
     }
 
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
 //        Log.d(TAG, "In onStop");
         reverseAndSaveMessages();
         Log.d(TAG, "messagesSize Before: " + messages.size());
@@ -141,7 +146,7 @@ public class InboxActivity extends AppCompatActivity {
                 MessageItem clickedMessage = messages.get(position);
 
                 clickedMessage.setReadTrue();
-             //   Toast.makeText(InboxActivity.this, "list item: " + position, Toast.LENGTH_SHORT).show();
+                //   Toast.makeText(InboxActivity.this, "list item: " + position, Toast.LENGTH_SHORT).show();
                 redirectToMessageView(viewClicked, clickedMessage);
                 adapter.notifyDataSetChanged();
             }
@@ -184,7 +189,7 @@ public class InboxActivity extends AppCompatActivity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    Toast.makeText(getContext(), "delete #: " + index, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "delete #: " + index, Toast.LENGTH_SHORT).show();
                     messages.remove(index);
                     adapter.notifyDataSetChanged();
                 }
@@ -262,6 +267,7 @@ public class InboxActivity extends AppCompatActivity {
             messages.add(messageItem);
         }
 
+        messageStringList.clear();
         // news messages to top of list
         Collections.reverse(messages);
 
@@ -291,20 +297,18 @@ public class InboxActivity extends AppCompatActivity {
     // When saving messages they need to be reversed in to be put back in file, because
     // new messages will be appended to file when they are sent from server
     public void reverseAndSaveMessages() {
-  //      Log.d(TAG, "In reverseAndSaveMessages");
+        Log.d(TAG, "In reverseAndSaveMessages");
 
-        // reverse the order - because the file has new messages appended to end
-        Collections.reverse(messages);
+        // delete file
+        deleteFile(Variables.MESSAGE_FILE);
 
+        if (!messages.isEmpty()) {
+            // reverse the order - because the file has new messages appended to end
+            Collections.reverse(messages);
         // string-a-fi all messages back to file
-        for(int i = 0; i < messages.size(); i++) {
-            // first clear file by not appending
-            if (i == 0) {
-                clearAndStoreMessage(messages.get(i).messageToString(), this.context);
-
-                // after initial clearing append the rest of the messages
-            } else {
-                storeMessage(messages.get(i).messageToString(), this.context);
+             for(int i = 0; i < messages.size(); i++) {
+                 Log.d(TAG, "Call store and same messages");
+                 storeMessage(messages.get(i).messageToString(), this.context);
             }
         }
     }

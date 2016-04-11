@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private Context context;
-    private String testJSON = convertJson("0101", "December 21, 2012", "0.1", "0.2", "1");
+ //   private String testJSON = convertJson("0101", "December 21, 2012", "0.1", "0.2", "1");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +55,8 @@ public class LoginActivity extends AppCompatActivity {
         context = this;
         GoogleCloudMessaging.getInstance(context);
 
-        // TESTING PURPOSE
-        storeMessage(testJSON, context);
+//        // TESTING PURPOSE
+//        storeMessage(testJSON, context);
 
         // check for gcm token, get one if there isn't one
         if(Variables.gcm_user_id.equals("") ) {
