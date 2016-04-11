@@ -204,22 +204,22 @@ public class InboxActivity extends AppCompatActivity {
             ImageView imageView = (ImageView) itemView.findViewById(R.id.item_image);
 
             switch (currentMessageItem.getMessage()) {
-                case "mad":
+                case "1":
                     imageView.setImageResource(R.drawable.mad);
                     break;
-                case "thank you":
+                case "2":
                     imageView.setImageResource(R.drawable.thankyou);
                     break;
-                case "slowdown":
+                case "3":
                     imageView.setImageResource(R.drawable.slowdown);
                     break;
-                case "no parking":
+                case "4":
                     imageView.setImageResource(R.drawable.no_parking);
                     break;
-                case "cellphone":
+                case "5":
                     imageView.setImageResource(R.drawable.cellphone);
                     break;
-                case "mechanic":
+                case "6":
                     imageView.setImageResource(R.drawable.mechanic);
                     break;
             }
