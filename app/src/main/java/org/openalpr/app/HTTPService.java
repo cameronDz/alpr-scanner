@@ -195,6 +195,12 @@ public class HTTPService {
                             "Press Continue to return to your home screen.";
                 } else if( activity == REPLY ) {
                     // TODO add functionality to this
+                    /*
+                            POST data:
+                            - message_type: "reply"
+                            - message_id: int
+                            - message_reply_content: int
+                    */
                     message = "Server acknowledges you replied to your latest message. " +
                             "Press Continue to return to your home screen.";
                 }
