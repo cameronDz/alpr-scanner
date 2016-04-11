@@ -1,9 +1,13 @@
 package org.openalpr.app;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
@@ -45,7 +49,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private Context context;
-    private String testJSON = convertJson("0101", "December 21, 2012", "0.1", "0.2", "1");
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private boolean isReceiverRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +59,6 @@ public class LoginActivity extends AppCompatActivity {
         // set context, used in sending data to server
         context = this;
         GoogleCloudMessaging.getInstance(context);
-
-        // TESTING PURPOSE
-        storeMessage(testJSON, context);
 
         // check for gcm token, get one if there isn't one
         if(Variables.gcm_user_id.equals("") ) {
@@ -88,6 +90,20 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "onPostExecute: " + msg);
                 }
             }.execute(null, null, null);
+        }
+
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                registerReceiver();
+            }
+        };
+    }
+
+    private void registerReceiver(){
+        if(!isReceiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver, new IntentFilter("registrationComplete"));
+            isReceiverRegistered = true;
         }
     }
 

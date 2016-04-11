@@ -54,7 +54,6 @@ import java.util.List;
 public class InboxActivity extends AppCompatActivity {
 
     private static String TAG = "InboxActivity";
-
     private Context context;
 
     private final int MID = 0;
@@ -64,25 +63,16 @@ public class InboxActivity extends AppCompatActivity {
     private final int MESSAGE = 4;
 
     // Messages for testing
-
-    private String test1 = "{\"mid\": \"0101\",\"timestamp\":\"December 21, 2012\",\"gps_lon\":\"-72.515108\",\"gps_lat\":\"41.793851\",\"message\":\"1\"}";
-
-    private String test2 = "{\"mid\":\"0111\",\"timestamp\":\"December 22, 2012\",\"gps_lon\":\"-72.76655\",\"gps_lat\":\"41.690668\",\"message\":\"2\"}";
-
-    private String test3 = "{\"mid\":\"08931\",\"timestamp\":\"December 23, 2012\",\"gps_lon\":\".11\",\"gps_lat\":\".34\",\"message\":\"3\"}";
-
-    private String test4 = "{\"mid\":\"0321\",\"timestamp\":\"December 24, 2012\",\"gps_lon\":\".76\",\"gps_lat\":\".67\",\"message\":\"4\"}]";
-
-    private String test5 = "{\"mid\":\"0321\",\"timestamp\":\"December 24, 2012\",\"gps_lon\":\".76\",\"gps_lat\":\".67\",\"message\":\"5\"}]";
-
-    private String test6 = "{\"mid\":\"0321\",\"timestamp\":\"December 24, 2012\",\"gps_lon\":\".76\",\"gps_lat\":\".67\",\"message\":\"6\"}]";
+//    private String test1 = "{\"mid\": \"0101\",\"timestamp\":\"December 21, 2012\",\"gps_lon\":\"-72.515108\",\"gps_lat\":\"41.793851\",\"message\":\"1\"}";
+//    private String test2 = "{\"mid\":\"0111\",\"timestamp\":\"December 22, 2012\",\"gps_lon\":\"-72.76655\",\"gps_lat\":\"41.690668\",\"message\":\"2\"}";
+//    private String test3 = "{\"mid\":\"08931\",\"timestamp\":\"December 23, 2012\",\"gps_lon\":\".11\",\"gps_lat\":\".34\",\"message\":\"3\"}";
+//    private String test4 = "{\"mid\":\"0321\",\"timestamp\":\"December 24, 2012\",\"gps_lon\":\".76\",\"gps_lat\":\".67\",\"message\":\"4\"}]";
+//    private String test5 = "{\"mid\":\"0321\",\"timestamp\":\"December 24, 2012\",\"gps_lon\":\".76\",\"gps_lat\":\".67\",\"message\":\"5\"}]";
+//    private String test6 = "{\"mid\":\"0321\",\"timestamp\":\"December 24, 2012\",\"gps_lon\":\".76\",\"gps_lat\":\".67\",\"message\":\"6\"}]";
 
     private ArrayList<MessageItem> messages;
-
     private ArrayAdapter<MessageItem> adapter;
-
     private ArrayList<String> messageStringList;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -291,7 +281,7 @@ public class InboxActivity extends AppCompatActivity {
     // When saving messages they need to be reversed in to be put back in file, because
     // new messages will be appended to file when they are sent from server
     public void reverseAndSaveMessages() {
-  //      Log.d(TAG, "In reverseAndSaveMessages");
+        Log.d(TAG, "In reverseAndSaveMessages");
 
         // reverse the order - because the file has new messages appended to end
         Collections.reverse(messages);
