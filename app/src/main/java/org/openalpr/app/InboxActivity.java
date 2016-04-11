@@ -204,22 +204,22 @@ public class InboxActivity extends AppCompatActivity {
             ImageView imageView = (ImageView) itemView.findViewById(R.id.item_image);
 
             switch (currentMessageItem.getMessage()) {
-                case "1":
+                case "mad":
                     imageView.setImageResource(R.drawable.mad);
                     break;
-                case "2":
+                case "thank you":
                     imageView.setImageResource(R.drawable.thankyou);
                     break;
-                case "3":
+                case "slowdown":
                     imageView.setImageResource(R.drawable.slowdown);
                     break;
-                case "4":
+                case "no parking":
                     imageView.setImageResource(R.drawable.no_parking);
                     break;
-                case "5":
+                case "cellphone":
                     imageView.setImageResource(R.drawable.cellphone);
                     break;
-                case "6":
+                case "mechanic":
                     imageView.setImageResource(R.drawable.mechanic);
                     break;
             }
@@ -378,7 +378,7 @@ public class InboxActivity extends AppCompatActivity {
      */
     protected static String[] messBreakDown(String message) {
    //     Log.d(TAG, "In messBreakDown");
-     //   Log.d(TAG, "messageBreakDown: " + message);
+        Log.d(TAG, "messageBreakDown: " + message);
         String[] s = new String[5];
 
         // attempt to break string into components
