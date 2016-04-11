@@ -75,7 +75,6 @@ import java.util.Locale;
 
 public class CameraActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private int MY_PERMISSIONS_CAMERA, MY_PERMISSIONS_ACCESS_FINE_LOCATION, MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     private static final String TAG = "CameraActivity";
@@ -272,7 +271,7 @@ public class CameraActivity extends AppCompatActivity implements
                  *    */
 
                 String fileName = String.format("%d", System.currentTimeMillis());
-                mTimeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
+                mTimeStamp = new SimpleDateFormat("MMddyyyy_HHmmss", Locale.ENGLISH).format(new Date());
                 String format = ".jpg";
                 File outFile = new File(dir, mTimeStamp + "_" + fileName + format);
 
@@ -336,7 +335,7 @@ public class CameraActivity extends AppCompatActivity implements
                 /** having issues getting the information from exif */
                 getPhotoInfo(tempFilePath);
 
-                if(mLatLng != null && mLatLng_Exif == null) {
+                if(mLatLng != null) {
                     Double lng = mLatLng.longitude;
                     Double lat = mLatLng.latitude;
                     String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
@@ -347,6 +346,7 @@ public class CameraActivity extends AppCompatActivity implements
                     String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
                     Log.d(TAG, "LatLng FROM PHOTO: " + latlng);
                 }
+
                 Bundle args = new Bundle();
                 args.putParcelable("mlatlng", mLatLng);
 
@@ -355,9 +355,8 @@ public class CameraActivity extends AppCompatActivity implements
                 intent.putExtra("picture", tempFilePath);
                 intent.putExtra("latlng", args);
                 intent.putExtra("timestamp", mTimeStamp);
-                Log.d(TAG, "latlng after putExtra " + mLatLng.latitude + ", " + mLatLng.longitude);
                 final long elapsedTimeMillis = System.currentTimeMillis() - startTime;
-                Log.d(TAG, "TOTAL SAVE IMAGE TIME: " + (elapsedTimeMillis/1000) + " seconds");
+                Log.d(TAG, "TOTAL SAVE IMAGE TIME: " + elapsedTimeMillis + " ms");
 
                 CameraActivity.this.startActivity(intent);
 
@@ -578,41 +577,6 @@ public class CameraActivity extends AppCompatActivity implements
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-    /** request permissions for API 23 */
-    private void permissionCheck(){
-        int permission = ContextCompat.checkSelfPermission(context,
-                Manifest.permission.CAMERA) &
-                ContextCompat.checkSelfPermission(context,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) &
-                ContextCompat.checkSelfPermission(context,
-                        Manifest.permission.ACCESS_FINE_LOCATION);
-
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
-        }
-
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-        }
-
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_CAMERA);
-        }
-    }
-
-    /** update class variables for LatLng & date/timestamp here */
     private void getPhotoInfo(String filename){
         try{
             ExifInterface ex = new ExifInterface(filename);
@@ -621,7 +585,7 @@ public class CameraActivity extends AppCompatActivity implements
             String attr_latitude = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
             String attr_latitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
             String attr_longitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
-            mTimeStamp = ex.getAttribute(ExifInterface.TAG_DATETIME);
+//            mTimeStamp = ex.getAttribute(ExifInterface.TAG_DATETIME);
 
 
 
