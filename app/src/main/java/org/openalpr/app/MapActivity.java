@@ -86,7 +86,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         for(MessageItem message : messages){
-            mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(message.getGpsLat()), Double.parseDouble(message.getGpsLon()))));
+            mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(Double.parseDouble(message.getGpsLat()), Double.parseDouble(message.getGpsLon())))
+                            .title(message.getMid()));
         }
     }
 
