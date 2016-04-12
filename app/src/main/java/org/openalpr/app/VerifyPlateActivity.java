@@ -1,5 +1,6 @@
 package org.openalpr.app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -13,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
@@ -37,39 +39,27 @@ import java.util.Locale;
 public class VerifyPlateActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private String TAG = "VerifyPlateActivity";
-
     private String mCurrentPhotoPath;
-
     private ImageView mImageView;
-
     private String state;
-
     private String plate;
-
     private Spinner stateSpinner;
-
     private Spinner plateSpinner;
-
     private TextView plateText;
-
     private TextView errorText;
-
     private String result;
-
     private ArrayList<String> candiateList;
-
     private String[] plateArray = new String[10];
-
     private int index;
-
     private LatLng mLatLng;
-
     private String mTimeStamp;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify);
+        context = this;
 
         errorText = (TextView) findViewById(R.id.errorTextView);
         errorText.setVisibility(View.INVISIBLE);
@@ -196,16 +186,36 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
     public void submitPlate(View view) {
         TextView textView = (TextView) findViewById(R.id.plateTextView);
 
-        Intent intent = new Intent(this, MessageSendActivity.class);
-        intent.putExtra("plate", textView.getText().toString());
-        intent.putExtra("state", state);
-        intent.putExtra("timestamp", mTimeStamp);
-        Bundle args = new Bundle();
-        args.putParcelable("mlatlng", mLatLng);
+        String plate = textView.getText().toString();
 
-        intent.putExtra("latlng", args);
+        if(plate.length() > 0 && plate.length() < 9) {
+            Intent intent = new Intent(this, MessageSendActivity.class);
+            intent.putExtra("plate", plate);
+            intent.putExtra("state", state);
+            intent.putExtra("timestamp", mTimeStamp);
+            Bundle args = new Bundle();
+            args.putParcelable("mlatlng", mLatLng);
 
-        startActivity(intent);
+            intent.putExtra("latlng", args);
+
+            startActivity(intent);
+        }
+        else if(plate.length() <= 0){
+            Log.d(TAG, "Plate length <= 0");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if passwords don't match
+            String message = "You must enter a plate number.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
+        else{
+            Log.d(TAG, "Plate length >= 9");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if passwords don't match
+            String message = "Plate number cannot be more than 8 characters.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
     }
 
     /**

@@ -2,6 +2,7 @@ package org.openalpr.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -197,6 +198,7 @@ public class InboxActivity extends AppCompatActivity {
 
             // fill text
             TextView textView = (TextView) itemView.findViewById(R.id.item_timestamp);
+            textView.setTextColor(Color.WHITE);
             textView.setText(currentMessageItem.getTimestamp());
 
 
