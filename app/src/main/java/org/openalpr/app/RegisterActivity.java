@@ -158,6 +158,7 @@ public class RegisterActivity extends AppCompatActivity {
             // save user name and password to be verified for global variables
             Variables.username = username;
             Variables.password = password;
+            Variables.email = email;
 
             // make button unclickable to avoid sending multiple registrations
             view.setClickable(false);

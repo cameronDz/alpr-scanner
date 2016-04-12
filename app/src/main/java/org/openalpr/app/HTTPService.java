@@ -97,6 +97,7 @@ public class HTTPService {
                     params.put("user_name", Variables.username);
                     params.put("user_password", Variables.password);
                     params.put("gcm_user_id", Variables.gcm_user_id);
+                    params.put("email", Variables.email);
                 } else if ( activity == PLATE ) {
                     // registering a plate to a user
                     params.put( "message_type", "plate" );

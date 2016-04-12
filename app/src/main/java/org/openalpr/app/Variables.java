@@ -44,6 +44,7 @@ public class Variables {
     protected static String gcm_user_id = "";
     protected static String gcm_inst_id = "";
     protected static int user_id = 0;
+    protected static String email = "";
 
     // sending message data
     protected static String plate_to = "";
