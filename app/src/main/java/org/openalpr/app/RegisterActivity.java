@@ -3,6 +3,7 @@ package org.openalpr.app;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -63,8 +64,10 @@ public class RegisterActivity extends AppCompatActivity {
         String confirm_password = cp.getText().toString();
         String email = e.getText().toString();
 
+
+
         // password check
-        Boolean passCheck = false, usernameCheck = false;
+        Boolean passCheck = false, usernameCheck = false, emailCheck = false;
 
         if(username.length() > 0 && username.length() < 45){
             Log.d(TAG, "Username check: Pass");
@@ -83,6 +86,21 @@ public class RegisterActivity extends AppCompatActivity {
             int duration = Toast.LENGTH_SHORT;
             // displays message to user if passwords don't match
             String message = "Username must be less than 45 characters.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
+
+        if(isValidEmail(email)){
+            Log.d(TAG, "Email check: Pass");
+            emailCheck = true;
+        }
+        else{
+            Log.d(TAG, "Email not valid");
+            // reset views email
+//            e.setText("", TextView.BufferType.EDITABLE);
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if passwords don't match
+            String message = "You must enter a valid email address.";
             Toast toast = Toast.makeText(context, message, duration);
             toast.show();
         }
@@ -127,9 +145,10 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         // send data to server if password check passes
-        if(usernameCheck && passCheck){
+        if(usernameCheck && passCheck && emailCheck){
             Log.d(TAG, "passCheck: true");
             Log.d(TAG, "usernameCheck: true");
+            Log.d(TAG, "emailCheck: true");
 
             // encrypt password here
             password = Integer.toString(password.hashCode());
@@ -145,6 +164,14 @@ public class RegisterActivity extends AppCompatActivity {
             // data sent out to server using Volley HTTP POST. determines if user
             // name is available and sends user to activity according to response
             HTTPService.sendData(context, view, 1);
+        }
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        if (TextUtils.isEmpty(target)) {
+            return false;
+        } else {
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
         }
     }
 

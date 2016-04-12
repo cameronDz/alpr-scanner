@@ -71,6 +71,8 @@
 
         <activity android:name=".ScanPlate" />
 
+        <activity android:name=".MapActivity" />
+
         <activity android:name=".VerifyPlateActivity" />
         <!-- android:screenOrientation="portrait"/> -->
         <activity android:name=".MessageSendActivity" />
