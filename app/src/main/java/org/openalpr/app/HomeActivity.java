@@ -48,6 +48,12 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void redirectToMap(View view) {
+        Log.d(TAG, "Map Button Pressed");
+        Intent intent = new Intent(this, MapActivity.class);
+        startActivity(intent);
+    }
+
     public void redirectToConfirmPlate(View view) {
         Log.d(TAG, "Confirm Plate Button Pressed");
         Intent intent = new Intent(this, ConfirmPlateActivity.class);

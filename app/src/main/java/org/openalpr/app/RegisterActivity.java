@@ -52,19 +52,68 @@ public class RegisterActivity extends AppCompatActivity {
      */
     public void Register(View view) {
         Log.d(TAG, "Register Button Pressed");
+
         // get user entered name and password from view
         EditText u = (EditText)findViewById(R.id.username);
         EditText p = (EditText)findViewById(R.id.password);
         EditText cp = (EditText)findViewById(R.id.confirm_password);
+        EditText e = (EditText)findViewById(R.id.email);
         String username = u.getText().toString();
         String password = p.getText().toString();
         String confirm_password = cp.getText().toString();
+        String email = e.getText().toString();
 
         // password check
-        Boolean passCheck = false;
+        Boolean passCheck = false, usernameCheck = false;
+
+        if(username.length() > 0 && username.length() < 45){
+            Log.d(TAG, "Username check: Pass");
+            usernameCheck = true;
+        }
+        else if(username.length() <= 0){
+            Log.d(TAG, "Username length <= 0");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if passwords don't match
+            String message = "You must enter a username.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
+        else{
+            Log.d(TAG, "Username length >= 45");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if passwords don't match
+            String message = "Username must be less than 45 characters.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
+
         if(password.equals(confirm_password)){
-            Log.d(TAG, "Password check: Pass");
-            passCheck = true;
+            if(password.length() > 0 && password.length() < 45){
+                Log.d(TAG, "Password check: Pass");
+                passCheck = true;
+            }
+            else if(password.length() <= 0){
+                Log.d(TAG, "Password length <= 0");
+                // reset views password
+                p.setText("", TextView.BufferType.EDITABLE);
+                cp.setText("", TextView.BufferType.EDITABLE);
+                int duration = Toast.LENGTH_SHORT;
+                // displays message to user if passwords don't match
+                String message = "You must enter a password.";
+                Toast toast = Toast.makeText(context, message, duration);
+                toast.show();
+            }
+            else{
+                Log.d(TAG, "Password length() >= 45");
+                // reset views password
+                p.setText("", TextView.BufferType.EDITABLE);
+                cp.setText("", TextView.BufferType.EDITABLE);
+                int duration = Toast.LENGTH_SHORT;
+                // displays message to user if passwords don't match
+                String message = "Password must be less than 45 characters.";
+                Toast toast = Toast.makeText(context, message, duration);
+                toast.show();
+            }
         } else {
             Log.d(TAG, "Password check: Fail");
             // reset views password
@@ -78,8 +127,9 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         // send data to server if password check passes
-        if(passCheck){
+        if(usernameCheck && passCheck){
             Log.d(TAG, "passCheck: true");
+            Log.d(TAG, "usernameCheck: true");
 
             // encrypt password here
             password = Integer.toString(password.hashCode());

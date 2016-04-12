@@ -66,6 +66,17 @@
             android:textSize="50sp"
             android:longClickable="false" />
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="View Map"
+            android:onClick="redirectToMap"
+            android:id="@+id/button_map"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:textSize="50sp"
+            android:longClickable="false" />
+
 
     </LinearLayout>
 </ScrollView>

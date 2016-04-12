@@ -43,7 +43,7 @@
         class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_weight="1" />
 
-    <LinearLayout
+    <!--<LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -103,6 +103,6 @@
                 android:background="#39ff2f" />
         </LinearLayout>
 
-    </LinearLayout>
+    </LinearLayout>-->
 </LinearLayout>
 
