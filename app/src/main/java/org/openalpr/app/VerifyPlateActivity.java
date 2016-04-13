@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *  Created by Travis
@@ -188,7 +190,12 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
         String plate = textView.getText().toString();
 
-        if(plate.length() > 0 && plate.length() < 9) {
+        // checks if String only contains letters and/or numbers (no special characters)
+        Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(plate);
+        boolean specialCharCheck = m.find();
+
+        if(plate.length() > 3 && plate.length() < 9 && specialCharCheck) {
             Intent intent = new Intent(this, MessageSendActivity.class);
             intent.putExtra("plate", plate);
             intent.putExtra("state", state);
@@ -200,10 +207,18 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
 
             startActivity(intent);
         }
+        else if(!specialCharCheck){
+            Log.d(TAG, "Plate has special characters");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if plate has a special character in it
+            String message = "License plates do not contain special characters.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
         else if(plate.length() <= 0){
             Log.d(TAG, "Plate length <= 0");
             int duration = Toast.LENGTH_SHORT;
-            // displays message to user if passwords don't match
+            // displays message to user if plate is too short
             String message = "You must enter a plate number.";
             Toast toast = Toast.makeText(context, message, duration);
             toast.show();
@@ -211,7 +226,7 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         else{
             Log.d(TAG, "Plate length >= 9");
             int duration = Toast.LENGTH_SHORT;
-            // displays message to user if passwords don't match
+            // displays message to user if plate is too long
             String message = "Plate number cannot be more than 8 characters.";
             Toast toast = Toast.makeText(context, message, duration);
             toast.show();

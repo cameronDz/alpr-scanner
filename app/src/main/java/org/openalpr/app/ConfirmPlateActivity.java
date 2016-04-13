@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Anthony Brignano on 2/23/16.
@@ -91,18 +93,51 @@ public class ConfirmPlateActivity extends AppCompatActivity
      */
     public void confirmPlate(View view) {
         Log.d(TAG, "ConfirmPlate Button Pressed");
-        EditText p = (EditText) findViewById(R.id.plate_number);
-        plate_number = p.getText().toString();
+        EditText plate = (EditText) findViewById(R.id.plate_number);
+        plate_number = plate.getText().toString();
 
-        // store user selected plate/state in global variables
-        Variables.user_plate = this.plate_number;
-        Variables.user_state = this.plate_state;
+        // checks if String only contains letters and/or numbers (no special characters)
+        Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(plate_number);
+        boolean specialCharCheck = m.find();
 
-        // make button unclickable to avoid sending multiple registrations
-        view.setClickable(false);
-        // data sent out to server using Volley HTTP POST. determines if plate
-        // is available and sends user to activity according to response
-        HTTPService.sendData(context, view, 2);
+        if(plate_number.length() > 0 && plate_number.length() < 9 && specialCharCheck) {
+            // store user selected plate/state in global variables
+            Variables.user_plate = this.plate_number;
+            Variables.user_state = this.plate_state;
+
+            // make button unclickable to avoid sending multiple registrations
+            view.setClickable(false);
+            // data sent out to server using Volley HTTP POST. determines if plate
+            // is available and sends user to activity according to response
+            HTTPService.sendData(context, view, 2);
+        }
+        else if(!specialCharCheck){
+            Log.d(TAG, "Plate contains special characters");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if plate has a special character in it
+            String message = "License plates do not contain special characters.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
+        else if(plate_number.length() <= 0){
+            Log.d(TAG, "Plate length <= 0");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if plate is too short
+            String message = "You must enter a license plate number.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
+        else{
+            Log.d(TAG, "Plate length >= 9");
+            int duration = Toast.LENGTH_SHORT;
+            // displays message to user if plate is too long
+            String message = "License plates cannot be more than 8 characters.";
+            Toast toast = Toast.makeText(context, message, duration);
+            toast.show();
+        }
+
+
     }
 
 
