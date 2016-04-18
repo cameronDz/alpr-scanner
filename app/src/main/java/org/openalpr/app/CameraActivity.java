@@ -1,49 +1,45 @@
 package org.openalpr.app;
 
 import android.app.Activity;
-    import android.Manifest;
-    import android.content.Context;
-    import android.content.Intent;
-    import android.content.pm.PackageManager;
-    import android.content.res.Configuration;
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.location.Location;
+import android.media.ExifInterface;
 import android.net.Uri;
-    import android.os.AsyncTask;
-    import android.os.Build;
-    import android.os.Environment;
-    import android.support.v4.app.ActivityCompat;
-    import android.support.v4.content.ContextCompat;
-    import android.support.v7.app.AppCompatActivity;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
-import android.view.WindowManager;
-    import android.os.Bundle;
-    import android.util.Log;
-    import android.view.Display;
-    import android.view.Surface;
-    import android.view.View;
-    import android.widget.Button;
-    import android.widget.FrameLayout;
-    import android.widget.RelativeLayout;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Display;
+import android.view.Surface;
+import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-    import java.io.IOException;
-    import java.text.SimpleDateFormat;
-    import java.util.Date;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -79,19 +75,18 @@ import java.util.Locale;
 
 public class CameraActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private int MY_PERMISSIONS_CAMERA, MY_PERMISSIONS_ACCESS_FINE_LOCATION, MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     private static final String TAG = "CameraActivity";
     private Camera mCamera;
     private Context context;
     private CameraPreview mPreview;
-    private GoogleApiClient mGoogleApiClient;
-    private LatLng mLatLng = null;
+    private LatLng mLatLng_Exif;
     private Location mLastLocation = null;
+    private LatLng mLatLng;
     private float mDist = 0;
-
-    private String tempFilePath;
+    private GoogleApiClient mGoogleApiClient;
+    private String mTimeStamp;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -138,8 +133,6 @@ public class CameraActivity extends AppCompatActivity implements
 
     @Override
     protected void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
         if (mPreview != null) {
             FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
             preview.removeView(mPreview);
@@ -149,7 +142,8 @@ public class CameraActivity extends AppCompatActivity implements
             stopCamera();
 
         }
-
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     @Override
@@ -159,6 +153,11 @@ public class CameraActivity extends AppCompatActivity implements
         startCamera();
     }
 
+    @Override
+    protected void onStart(){
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
@@ -166,23 +165,40 @@ public class CameraActivity extends AppCompatActivity implements
         public void onPictureTaken(byte[] data, Camera camera) {
             // calls async task to save images without interrupting application
             new SaveImageTask().execute(data);
-            /**
-             * will have to move the getting of latitude and longitude to where the intent is for
-             * directing to the next activity so that they can be passes as intent extras to be
-             * available
-             */
-            if(mLatLng != null) {
-                Double lng = mLatLng.longitude;
-                Double lat = mLatLng.latitude;
-                String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
-                Log.d(TAG, "Current LatLng: " + latlng);
-                Log.d(TAG, "onPictureTaken - jpeg");
-
-            }
-            // camera.startPreview();
         }
     };
 
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // check if API version is 23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            // check if permission is granted
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            }
+        }
+        else{
+            // if API version is not 23 just set mLastLocation
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Log.d(TAG, mLastLocation.toString());
+        }
+        // set LatLng variable -- not sure if this is necessary, mLastLocation already exists as a Location variable
+        if (mLastLocation != null) {
+            mLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            Log.d(TAG, mLatLng.latitude + ", " + mLatLng.longitude);
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i){
+        // code to be run when connection is stopped
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult cr){
+        // code to be run when connection fails
+    }
 
     /** A safe way to get an instance of the Camera object. */
     public static Camera getCameraInstance(){
@@ -236,7 +252,8 @@ public class CameraActivity extends AppCompatActivity implements
 
         @Override
         protected Void doInBackground(byte[]... data) {
-            FileOutputStream fos = null;
+            long startTime = System.currentTimeMillis();
+            FileOutputStream fos;
 
             // Write to SD Card
             try {
@@ -252,17 +269,14 @@ public class CameraActivity extends AppCompatActivity implements
                  *    timeStamp -> "MM/DD/YYYY"
                  *    format -> jpg
                  *    */
+
                 String fileName = String.format("%d", System.currentTimeMillis());
-                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
+                mTimeStamp = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a z", Locale.ENGLISH).format(new Date());
                 String format = ".jpg";
-                File outFile = new File(dir, timeStamp + "_" + fileName + format);
+                Log.d(TAG, mTimeStamp);
+                File outFile = new File(dir, mTimeStamp + "_" + fileName + format);
 
-                /*fos = new FileOutputStream(outFile);
-                fos.write(data[0]);
-                fos.flush();
-                fos.close();*/
-
-                tempFilePath = outFile.getAbsolutePath();
+                String tempFilePath = outFile.getAbsolutePath();
 
                 Bitmap bmp = BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
 
@@ -279,7 +293,6 @@ public class CameraActivity extends AppCompatActivity implements
                         matrix.postRotate(90);
                     }
                 }
-
                 else if (display.getRotation() == Surface.ROTATION_90) {
                     if (rotation == Configuration.ORIENTATION_PORTRAIT) {
                         matrix.postRotate(270);
@@ -288,7 +301,6 @@ public class CameraActivity extends AppCompatActivity implements
                         matrix.postRotate(0);
                     }
                 }
-
                 else if (display.getRotation() == Surface.ROTATION_180) {
                     if (rotation == Configuration.ORIENTATION_LANDSCAPE) {
                         matrix.postRotate(180);
@@ -296,7 +308,6 @@ public class CameraActivity extends AppCompatActivity implements
                         matrix.postRotate(270);
                     }
                 }
-
                 else if (display.getRotation() == Surface.ROTATION_270) {
                     if (rotation == Configuration.ORIENTATION_PORTRAIT) {
                         matrix.postRotate(90);
@@ -305,7 +316,6 @@ public class CameraActivity extends AppCompatActivity implements
                     }
                 }
 
-//                matrix.postRotate(90);
                 bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
 
                 try {
@@ -320,16 +330,36 @@ public class CameraActivity extends AppCompatActivity implements
                 }
 
                 Log.d(TAG, "onPictureTaken - wrote bytes: " + data.length + " to " + outFile.getAbsolutePath());
-                refreshGallery(outFile);
 
                 refreshGallery(outFile);
-                tempFilePath = outFile.getAbsolutePath();
+
+                /** having issues getting the information from exif */
+                getPhotoInfo(tempFilePath);
+
+                if(mLatLng != null) {
+                    Double lng = mLatLng.longitude;
+                    Double lat = mLatLng.latitude;
+                    String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+                    Log.d(TAG, "LatLng FROM GPS: " + latlng);
+                } else if(mLatLng_Exif != null) {
+                    Double lng = mLatLng_Exif.longitude;
+                    Double lat = mLatLng_Exif.latitude;
+                    String latlng = "(" + lat.toString() + ", " + lng.toString() + ")";
+                    Log.d(TAG, "LatLng FROM PHOTO: " + latlng);
+                }
+
+                Bundle args = new Bundle();
+                args.putParcelable("mlatlng", mLatLng);
+
 
                 Intent intent = new Intent(context, ScanPlate.class);
                 intent.putExtra("picture", tempFilePath);
+                intent.putExtra("latlng", args);
+                intent.putExtra("timestamp", mTimeStamp);
+                final long elapsedTimeMillis = System.currentTimeMillis() - startTime;
+                Log.d(TAG, "TOTAL SAVE IMAGE TIME: " + elapsedTimeMillis + " ms");
+
                 CameraActivity.this.startActivity(intent);
-
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -463,42 +493,6 @@ public class CameraActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onStart(){
-        mGoogleApiClient.connect();
-        super.onStart();
-    }
-
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        // check if API version is 23
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            // check if permission is granted
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            }
-        }
-        else{
-            // if API version is not 23 just set mLastLocation
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        }
-        // set LatLng variable -- not sure if this is necessary, mLastLocation already exists as a Location variable
-        if (mLastLocation != null) {
-            mLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i){
-        // code to be run when connection is stopped
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult cr){
-        // code to be run when connection fails
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
         // Get the pointer ID
         Camera.Parameters params = mCamera.getParameters();
@@ -522,9 +516,16 @@ public class CameraActivity extends AppCompatActivity implements
         return true;
     }
 
+    /** zoom on finger pinch
+     * need to adjust the speed based on size of screen?
+     * is too slow for travis on his device */
     private void handleZoom(MotionEvent event, Camera.Parameters params) {
         int maxZoom = params.getMaxZoom();
         int zoom = params.getZoom();
+
+        // change newDist to equal the position of the SeekBar
+        // mDist * SeekBar_location (0-1.0)
+
         float newDist = getFingerSpacing(event);
         if (newDist > mDist) {
             //zoom in
@@ -540,6 +541,7 @@ public class CameraActivity extends AppCompatActivity implements
         mCamera.setParameters(params);
     }
 
+    /** refocus preview after zoom */
     public void handleFocus(MotionEvent event, Camera.Parameters params) {
         int pointerId = event.getPointerId(0);
         int pointerIndex = event.findPointerIndex(pointerId);
@@ -566,27 +568,6 @@ public class CameraActivity extends AppCompatActivity implements
         return (float)Math.sqrt(x * x + y * y);
     }
 
-
-    protected void createLocationRequest() {
-        /**
-         * Performance hint: If your app accesses the network or does other long-running work
-         * after receiving a location update, adjust the fastest interval to a slower value.
-         * This adjustment prevents your app from receiving updates it can't use.
-         * Once the long-running work is done, set the fastest interval back to a fast value.
-         */
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
-                        builder.build());
-    }
-
     /** Check if this device has a camera */
     private boolean checkCameraHardware(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
@@ -597,37 +578,80 @@ public class CameraActivity extends AppCompatActivity implements
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-    /** request permissions for API 23 */
-    private void permissionCheck(){
-        int permission = ContextCompat.checkSelfPermission(context,
-                Manifest.permission.CAMERA) &
-                ContextCompat.checkSelfPermission(context,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) &
-                ContextCompat.checkSelfPermission(context,
-                        Manifest.permission.ACCESS_FINE_LOCATION);
+    private void getPhotoInfo(String filename){
+        try{
+            ExifInterface ex = new ExifInterface(filename);
+            Double lat, lon;
+            String attr_longitude = ex.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
+            String attr_latitude = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
+            String attr_latitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
+            String attr_longitude_ref = ex.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
+//            mTimeStamp = ex.getAttribute(ExifInterface.TAG_DATETIME);
 
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
+
+
+            if((attr_latitude != null)
+                    && (attr_latitude_ref != null)
+                    && (attr_longitude != null)
+                    && (attr_longitude_ref != null))
+            {
+                if(attr_latitude_ref.equals("N")){
+                    lat = convertToDegree(attr_latitude);
+                }
+                else{
+                    lat = 0 - convertToDegree(attr_latitude);
+                }
+
+                if(attr_longitude_ref.equals("E")){
+                    lon = convertToDegree(attr_longitude);
+                }
+                else{
+                    lon = 0 - convertToDegree(attr_longitude);
+                }
+
+                mLatLng_Exif = new LatLng(lat, lon);
+                Log.d(TAG, "GPS FROM PHOTO: " + mLatLng_Exif.toString());
+                Log.d(TAG, "DATETIME FROM PHOTO: " + mTimeStamp);
+            }
+            else{
+                Log.d(TAG, "Photo Exif data appears to be null.");
+                Log.d(TAG, "lat = " + attr_latitude);
+                Log.d(TAG, "lat_ref = " + attr_latitude_ref);
+                Log.d(TAG, "lon = " + attr_longitude);
+                Log.d(TAG, "long_ref = " + attr_longitude_ref);
+            }
+
+
+        } catch(IOException e){
+            e.printStackTrace();
         }
 
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-        }
-
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_CAMERA);
-        }
     }
+
+    /** convert the String latitude/longitude to a double value for the corresponding degree */
+    private double convertToDegree(String stringDMS){
+        double result;
+        String[] DMS = stringDMS.split(",", 3);
+
+        String[] stringD = DMS[0].split("/", 2);
+        Double D0 = Double.valueOf(stringD[0]);
+        Double D1 = Double.valueOf(stringD[1]);
+        Double FloatD = D0/D1;
+
+        String[] stringM = DMS[1].split("/", 2);
+        Double M0 = Double.valueOf(stringM[0]);
+        Double M1 = Double.valueOf(stringM[1]);
+        Double FloatM = M0/M1;
+
+        String[] stringS = DMS[2].split("/", 2);
+        Double S0 = Double.valueOf(stringS[0]);
+        Double S1 = Double.valueOf(stringS[1]);
+        Double FloatS = S0/S1;
+
+        result = FloatD + (FloatM/60) + (FloatS/3600);
+
+        return result;
+
+    }
+
 }

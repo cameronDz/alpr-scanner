@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/img_message"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="message_icon"
+        android:layout_marginTop="20sp"
+        android:layout_marginBottom="5sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPostalAddress"
+        android:ems="10"
+        android:id="@+id/text_location"
+        android:text="LOCATION"
+        android:textSize="20sp"
+        android:gravity="center_horizontal"
+        android:layout_margin="10sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/text_datetime"
+        android:editable="false"
+        android:gravity="center_horizontal"
+        android:textSize="20sp"
+        android:text="DATETIME"
+        android:layout_margin="10sp" />
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:name="com.google.android.gms.maps.MapFragment"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_weight="1" />
+
+    <!--<LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send Feedback?"
+            android:id="@+id/textView"
+            android:textSize="25sp"
+            android:layout_marginLeft="10sp"
+            android:layout_marginTop="10sp"
+            android:layout_marginBottom="10sp"
+            android:layout_marginRight="10sp" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_negative"
+                android:src="@drawable/thumbs_down"
+                android:scaleType="fitXY"
+                android:layout_weight="1"
+                android:onClick="sendFeedback"
+                android:contentDescription="negative"
+                android:background="#fd1f1f"
+                android:padding="10dp" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_neutral"
+                android:layout_weight="1"
+                android:src="@drawable/dont_care"
+                android:scaleType="fitXY"
+                android:onClick="sendFeedback"
+                android:contentDescription="neutral"
+                android:background="#ffeb53"
+                android:padding="10dp" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_positive"
+                android:scaleType="fitXY"
+                android:src="@drawable/thumbs_up"
+                android:layout_weight="1"
+                android:onClick="sendFeedback"
+                android:contentDescription="positive"
+                android:padding="10dp"
+                android:background="#39ff2f" />
+        </LinearLayout>
+
+    </LinearLayout>-->
+</LinearLayout>
+
