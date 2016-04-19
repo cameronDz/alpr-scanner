@@ -54,6 +54,7 @@ public class ConfirmPlateActivity extends AppCompatActivity
     private Context context;
     private String plate_state = "";
     protected String plate_number = "";
+    boolean specialCharCheck = true;
 
     private String[] abrv_state;
 
@@ -97,9 +98,12 @@ public class ConfirmPlateActivity extends AppCompatActivity
         plate_number = plate.getText().toString();
 
         // checks if String only contains letters and/or numbers (no special characters)
-        Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("\\w", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(plate_number);
-        boolean specialCharCheck = m.find();
+        specialCharCheck = m.find();
+
+        Log.d(TAG, "plate_number: " + plate_number);
+        Log.d(TAG, "specialCharCheck: " + specialCharCheck);
 
         if(plate_number.length() > 0 && plate_number.length() < 9 && specialCharCheck) {
             // store user selected plate/state in global variables
