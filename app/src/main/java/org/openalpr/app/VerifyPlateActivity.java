@@ -189,11 +189,14 @@ public class VerifyPlateActivity extends AppCompatActivity implements AdapterVie
         TextView textView = (TextView) findViewById(R.id.plateTextView);
 
         String plate = textView.getText().toString();
+        boolean specialCharCheck = true;
 
         // checks if String only contains letters and/or numbers (no special characters)
-        Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("\\w", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(plate);
-        boolean specialCharCheck = m.find();
+        specialCharCheck = m.find();
+        
+        
 
         if(plate.length() > 3 && plate.length() < 9 && specialCharCheck) {
             Intent intent = new Intent(this, MessageSendActivity.class);
