@@ -9,11 +9,7 @@ import android.widget.Toast;
 import android.widget.TextView;
 
 // some of these might not be needed
-import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationListener;
-import com.google.android.gms.location.LocationListener;
-
 
 /**
  * Created by Anthony Brignano on 2/26/16.
@@ -61,7 +57,7 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         } else {
             // notify user to turn location on
-            Toast.makeText(getContext(), "Turn GPS location on to use Camera Mode", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Turn GPS location on to use Camera Mode", Toast.LENGTH_SHORT).show();
         }
     }
 
