@@ -5,7 +5,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 import android.widget.TextView;
+
+// some of these might not be needed
+import android.location.LocationManager;
 
 /**
  * Created by Anthony Brignano on 2/26/16.
@@ -44,8 +48,17 @@ public class HomeActivity extends AppCompatActivity {
 
     public void redirectToCamera(View view) {
         Log.d(TAG, "Camera Button Pressed");
-        Intent intent = new Intent(this, CameraActivity.class);
-        startActivity(intent);
+        
+        // detect whether location is on or not
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);         
+        if( locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ){
+            // send user to camera view
+            Intent intent = new Intent(this, CameraActivity.class);
+            startActivity(intent);
+        } else {
+            // notify user to turn location on
+            Toast.makeText(this, "Turn GPS location on to use Camera Mode", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void redirectToMap(View view) {
